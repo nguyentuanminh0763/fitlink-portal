@@ -1,4 +1,4 @@
-import { NavLink, Link } from 'react-router-dom'
+import { NavLink, Link } from "react-router-dom";
 import {
   FaTachometerAlt,
   FaUsers,
@@ -8,42 +8,48 @@ import {
   FaClipboardList,
   FaCalendarAlt,
   FaSignOutAlt,
-  FaMoneyCheckAlt
-} from 'react-icons/fa'
-import { useState } from 'react'
+  FaMoneyCheckAlt,
+  FaReceipt,
+} from "react-icons/fa";
+import { useState } from "react";
 
 const menuItems = [
-  { label: 'Dashboard', icon: <FaTachometerAlt />, to: '/admin' },
+  { label: "Dashboard", icon: <FaTachometerAlt />, to: "/admin" },
   {
-    label: 'User Management',
+    label: "User Management",
     icon: <FaUsers />,
-    to: '/admin/users',
+    to: "/admin/users",
     subMenu: [
-      { label: 'PT List', to: '/admin/users/pts' },
-      { label: 'Student List', to: '/admin/users/students' }
-    ]
+      { label: "PT List", to: "/admin/users/pts" },
+      { label: "Student List", to: "/admin/users/students" },
+    ],
   },
-  { label: 'Verify PT', icon: <FaTachometerAlt />, to: '/admin/pt-requests' },
   {
-    label: 'Send Notification',
+    label: "View Transactions",
+    icon: <FaReceipt />,
+    to: "/admin-transactions",
+  },
+  { label: "Verify PT", icon: <FaTachometerAlt />, to: "/admin/pt-requests" },
+  {
+    label: "Send Notification",
     icon: <FaConciergeBell />,
-    to: '/admin/send-notification'
+    to: "/admin/send-notification",
   },
   {
-    label: 'Payout Requests',
+    label: "Payout Requests",
     icon: <FaMoneyCheckAlt />,
     subMenu: [
-      { label: 'All', to: '/admin/payouts' },
-      { label: 'Pending', to: '/admin/payouts?status=pending' },
-      { label: 'Completed', to: '/admin/payouts?status=completed' },
-      { label: 'Rejected', to: '/admin/payouts?status=rejected' }
-    ]
+      { label: "All", to: "/admin/payouts" },
+      { label: "Pending", to: "/admin/payouts?status=pending" },
+      { label: "Completed", to: "/admin/payouts?status=completed" },
+      { label: "Rejected", to: "/admin/payouts?status=rejected" },
+    ],
   },
-  { label: 'Logout', icon: <FaSignOutAlt />, to: '/logout' }
-]
+  { label: "Logout", icon: <FaSignOutAlt />, to: "/logout" },
+];
 
 export default function SidebarAdmin() {
-  const [openMenu, setOpenMenu] = useState(null)
+  const [openMenu, setOpenMenu] = useState(null);
 
   return (
     <aside className="h-screen w-64 bg-[#0f172a] border-r border-slate-800 shadow-lg flex flex-col py-8 px-4 text-gray-200">
@@ -67,7 +73,7 @@ export default function SidebarAdmin() {
                 <span className="text-lg text-orange-400">{item.icon}</span>
                 <span>{item.label}</span>
                 <span className="ml-auto text-xs text-gray-400">
-                  {openMenu === item.label ? '▲' : '▼'}
+                  {openMenu === item.label ? "▲" : "▼"}
                 </span>
               </div>
 
@@ -81,8 +87,8 @@ export default function SidebarAdmin() {
                       className={({ isActive }) =>
                         `block px-4 py-1 rounded transition-all duration-200 text-sm ${
                           isActive
-                            ? 'bg-orange-500 text-white font-semibold'
-                            : 'text-gray-400 hover:text-white hover:bg-slate-800'
+                            ? "bg-orange-500 text-white font-semibold"
+                            : "text-gray-400 hover:text-white hover:bg-slate-800"
                         }`
                       }
                     >
@@ -96,12 +102,12 @@ export default function SidebarAdmin() {
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === '/admin'}
+              end={item.to === "/admin"}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                   isActive
-                    ? 'bg-orange-500 text-white'
-                    : 'text-gray-300 hover:text-white hover:bg-slate-800'
+                    ? "bg-orange-500 text-white"
+                    : "text-gray-300 hover:text-white hover:bg-slate-800"
                 }`
               }
             >
@@ -112,5 +118,5 @@ export default function SidebarAdmin() {
         )}
       </nav>
     </aside>
-  )
+  );
 }
