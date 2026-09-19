@@ -15,8 +15,9 @@ export default function App() {
       <ScrollToTop />
       <AppRouter />
       <ToastContainer
-        position="top-left" // 👈 Vị trí ở góc trái dưới
-        autoClose={3000}       // Tự động tắt sau 3 giây
+        position="top-left"
+        autoClose={3000}
+        limit={3}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick
