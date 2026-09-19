@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
+import { FaClock } from 'react-icons/fa';
 import axiosClient from '~/api/axiosClient'; // Dùng đường dẫn phù hợp với cấu trúc của bạn
 import PackageDetailModal from './PackageDetailModal'; // Import Modal
 
@@ -13,30 +14,21 @@ const PackageCard = ({ packageInfo, onDetailsClick, isLoading }) => {
     };
 
     return (
-        <div style={{ border: '1px solid #ccc', padding: '20px', maxWidth: '300px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-            <h3 style={{ color: '#6a1b9a', marginBottom: '5px' }}>{packageInfo.name}</h3>
-            <p style={{ margin: '0 0 15px 0' }}>{packageInfo.subtitle || 'PT kèm 1-1 cho người mới bắt đầu'}</p>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
-                <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#ff6600' }}>
-                    💰 {formatVND(packageInfo.price)}
+        <div className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm hover:shadow-md transition text-slate-800 dark:text-slate-100 max-w-[300px]">
+            <h3 className="font-bold text-orange-600 dark:text-orange-400 mb-1 text-lg">{packageInfo.name}</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-xs mb-3">{packageInfo.subtitle || 'PT kèm 1-1 cho người mới bắt đầu'}</p>
+            <div className="flex items-center mb-3">
+                <span className="text-lg font-extrabold text-slate-900 dark:text-white">
+                    {formatVND(packageInfo.price)}
                 </span>
             </div>
-            <p style={{ margin: '0 0 15px 0' }}>
-                ⏰ Thời lượng: {packageInfo.durationDays || '?'} ngày
+            <p className="text-xs text-slate-600 dark:text-slate-400 mb-4 flex items-center gap-1.5">
+                <FaClock className="text-slate-400 text-xs" /> Thời lượng: {packageInfo.durationDays || '?'} ngày
             </p>
             
             <button 
                 onClick={() => onDetailsClick(packageInfo._id)}
-                style={{ 
-                    backgroundColor: isLoading ? '#ccc' : '#ff6600', 
-                    color: 'white', 
-                    border: 'none', 
-                    padding: '10px 20px', 
-                    borderRadius: '4px', 
-                    cursor: 'pointer', 
-                    width: '100%',
-                    transition: 'background-color 0.2s'
-                }}
+                className="w-full py-2.5 px-4 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-semibold text-xs transition shadow-xs cursor-pointer"
                 disabled={isLoading}
             >
                 {isLoading ? 'Đang tải...' : 'Xem chi tiết'}

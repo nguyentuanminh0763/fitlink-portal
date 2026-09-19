@@ -1,82 +1,76 @@
 // src/pages/SearchPTs.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  FaSearch,
+  FaMapMarkerAlt,
+  FaCrosshairs,
+  FaFilter,
+  FaStar,
+  FaDumbbell,
+  FaTimes,
+  FaCheckCircle,
+  FaRedo,
+  FaSlidersH,
+  FaArrowRight,
+  FaThLarge,
+  FaList,
+  FaCalendarCheck,
+  FaShieldAlt,
+} from "react-icons/fa";
 import { searchPTs } from "~/services/searchService";
+import { useSearchPTsQuery } from "~/hooks/usePTQueries";
 import { PackageTagLabels } from "~/domain/enum";
 import MainLayout from "~/layouts/MainLayout";
+import { toast } from "react-toastify";
+import { toSlug } from "~/utils/slug";
 
 const modeLabels = {
-  atPtGym: "Tại PT's Gym",
-  atClient: "Tại nhà khách",
-  atOtherGym: "Gym khác",
+  atPtGym: "Tại phòng PT",
+  atClient: "Tại nhà học viên",
+  atOtherGym: "Phòng gym đối tác",
 };
+
+// Clean text pills without emoji spam
+const quickGoalPills = [
+  { key: "", label: "Tất cả mục tiêu" },
+  { key: "weight_loss", label: "Giảm mỡ & Siết cân" },
+  { key: "muscle_gain", label: "Tăng cơ & Sức mạnh" },
+  { key: "rehab", label: "Yoga & Phục hồi" },
+  { key: "posture", label: "Chỉnh dáng & Cột sống" },
+  { key: "endurance", label: "Kickboxing & Cardio" },
+];
+
+const provinces = [
+  "Hồ Chí Minh", "Hà Nội", "Đà Nẵng", "Cần Thơ", "Hải Phòng", "Bình Dương",
+  "Đồng Nai", "Khánh Hòa", "Lâm Đồng", "Bà Rịa - Vũng Tàu", "An Giang",
+  "Bắc Ninh", "Cà Mau", "Cao Bằng", "Đắk Lắk", "Điện Biên", "Đồng Tháp",
+  "Gia Lai", "Hà Tĩnh", "Hưng Yên", "Lai Châu", "Lạng Sơn", "Lào Cai",
+  "Nghệ An", "Ninh Bình", "Phú Thọ", "Quảng Ngãi", "Quảng Ninh", "Quảng Trị",
+  "Sơn La", "Tây Ninh", "Thái Nguyên", "Thanh Hóa", "Huế", "Tuyên Quang", "Vĩnh Long",
+];
 
 export default function SearchPTs() {
   const navigate = useNavigate();
-  const [pts, setPTs] = useState([]);
-  const [availableAt, setAvailableAt] = useState("");
   const [sortBy, setSortBy] = useState("best");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(9);
-  const [total, setTotal] = useState(0);
+  const [limit] = useState(12); // Display 12 PTs per page for rich density
+  const [viewMode, setViewMode] = useState("grid"); // 'grid' | 'list'
 
-  // Location + mode
-  const [showLocationScreen, setShowLocationScreen] = useState(false);
-  const [area, setArea] = useState("");
-  const [selectedMode, setSelectedMode] = useState("");
-  const [detecting, setDetecting] = useState(false);
-  const [detectedInfo, setDetectedInfo] = useState("");
-  const [coords, setCoords] = useState("");
-  const [showFallback, setShowFallback] = useState(false);
-
-  // Search by name + goals
+  // Filters
   const [name, setName] = useState("");
   const [goal, setGoal] = useState("");
+  const [selectedMode, setSelectedMode] = useState("");
+  const [area, setArea] = useState("");
+  const [coords, setCoords] = useState("");
 
-  // Provinces
-  const provinces = [
-    "An Giang", "Bắc Ninh", "Cà Mau", "Cần Thơ", "Cao Bằng", "Đà Nẵng", "Đắk Lắk", "Điện Biên",
-    "Đồng Nai", "Đồng Tháp", "Gia Lai", "Hà Nội", "Hà Tĩnh", "Hải Phòng", "Hưng Yên",
-    "Khánh Hòa", "Lai Châu", "Lâm Đồng", "Lạng Sơn", "Lào Cai", "Nghệ An", "Ninh Bình",
-    "Phú Thọ", "Quảng Ngãi", "Quảng Ninh", "Quảng Trị", "Sơn La", "Tây Ninh", "Thái Nguyên",
-    "Thanh Hóa", "Huế", "Tuyên Quang", "Vĩnh Long", "Hồ Chí Minh",
-  ];
+  // Location Modal
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [detecting, setDetecting] = useState(false);
+  const [detectedInfo, setDetectedInfo] = useState("");
 
-  // Detect GPS location
-  const detectLocation = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported.");
-      return;
-    }
-    setDetecting(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        const latLon = `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
-        setCoords(latLon);
-        try {
-          const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1&accept-language=en`;
-          const res = await fetch(url);
-          const data = await res.json();
-          const addr = data?.address || {};
-          const line = addr.city || addr.town || addr.state || data?.display_name || "";
-          setDetectedInfo(`Detected: ${line || latLon}`);
-        } catch {
-          setDetectedInfo(`Detected coordinates: ${latLon}`);
-        } finally {
-          setDetecting(false);
-        }
-      },
-      () => {
-        alert("Failed to get location permission.");
-        setDetecting(false);
-      }
-    );
-  };
-
-  // Load saved
+  // Load saved location on mount
   useEffect(() => {
     const savedArea = localStorage.getItem("studentArea");
     const savedMode = localStorage.getItem("studentMode") || "";
@@ -85,544 +79,752 @@ export default function SearchPTs() {
     if (savedArea) {
       setArea(savedArea);
       setCoords("");
-      localStorage.removeItem("studentCoords");
     } else if (savedCoords) {
       setCoords(savedCoords);
     }
-
     if (savedMode) setSelectedMode(savedMode);
-
-    setShowLocationScreen(!savedArea && !savedCoords);
   }, []);
 
-  // Save local
+  // Save changes to localStorage
   useEffect(() => {
-    if (area) localStorage.setItem("studentArea", area);
-    if (coords) localStorage.setItem("studentCoords", coords);
+    if (area) {
+      localStorage.setItem("studentArea", area);
+      localStorage.removeItem("studentCoords");
+    } else if (coords) {
+      localStorage.setItem("studentCoords", coords);
+      localStorage.removeItem("studentArea");
+    }
     if (selectedMode) localStorage.setItem("studentMode", selectedMode);
   }, [area, coords, selectedMode]);
 
-  // Fetch PTs
-  const fetchPTs = async () => {
-    if (!area && !coords) return;
-
-    try {
-      setLoading(true);
-      setError("");
-
-      const params = {
-        availableAt,
-        sortBy,
-        specialty: goal,
-        page,
-        limit,
-        modes: selectedMode ? [selectedMode] : [],
-        name,
-      };
-
-      if (area) params.area = area;
-      else if (coords) params.coords = coords;
-
-      const res = await searchPTs(params);
-      const list = res?.items || [];
-      setPTs(list);
-      setTotal(res?.total || 0);
-
-      setShowFallback(list.length === 0 && !!coords);
-    } catch (err) {
-      console.error(err);
-      setError("Failed to load trainers.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!showLocationScreen && (area || coords) && selectedMode) fetchPTs();
-  }, [
-    availableAt,
-    sortBy,
-    name,
-    goal,
-    page,
-    limit,
-    area,
-    coords,
-    selectedMode,
-    showLocationScreen,
-  ]);
-
-  const handleConfirmArea = () => {
-    if (!area && !coords) {
-      alert("Please select a location (city or GPS).");
+  // GPS Geolocation Detection
+  const detectLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Trình duyệt của bạn không hỗ trợ định vị GPS.");
       return;
     }
-    setShowLocationScreen(false);
-    setPage(1);
-    fetchPTs();
+    setDetecting(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        const latLon = `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+        setCoords(latLon);
+        setArea("");
+        try {
+          const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1&accept-language=vi`;
+          const res = await fetch(url);
+          const data = await res.json();
+          const addr = data?.address || {};
+          const line = addr.city || addr.town || addr.state || data?.display_name || "";
+          setDetectedInfo(line ? `Vị trí: ${line}` : `Tọa độ: ${latLon}`);
+          toast.success("Đã xác định vị trí GPS thành công!");
+        } catch {
+          setDetectedInfo(`Tọa độ GPS: ${latLon}`);
+        } finally {
+          setDetecting(false);
+          setIsLocationModalOpen(false);
+          setPage(1);
+        }
+      },
+      (err) => {
+        console.error(err);
+        toast.warn("Không thể lấy vị trí. Vui lòng cho phép quyền truy cập GPS trên trình duyệt.");
+        setDetecting(false);
+      },
+      { timeout: 10000 }
+    );
   };
 
-  /* ========== SETUP LOCATION SCREEN ========== */
-  if (showLocationScreen) {
-    return (
-      <MainLayout>
-        <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-white flex flex-col pt-12">
-          <div className="px-6 md:px-10 mb-4">
-            <button
-              onClick={() => setShowLocationScreen(false)}
-              className="inline-flex items-center gap-1 text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors"
-            >
-              <span>←</span>
-              <span>Back to trainers</span>
-            </button>
-          </div>
+  // Search parameters for TanStack Query
+  const searchParams = useMemo(() => {
+    const params = {
+      sortBy,
+      specialty: goal,
+      page,
+      limit,
+      name: name.trim(),
+    };
+    if (selectedMode) params.modes = [selectedMode];
+    if (area) params.area = area;
+    else if (coords) params.coords = coords;
+    return params;
+  }, [sortBy, goal, page, limit, name, selectedMode, area, coords]);
 
-          <div className="flex-1 flex items-center justify-center px-4 pb-10">
-            <div className="w-full max-w-xl bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-orange-100 px-7 py-8 md:px-10 md:py-10 animate-card-fade-up">
-              <div className="text-center mb-6">
-                <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 text-[11px] font-semibold text-orange-600 mb-3">
-                  <span>📍</span>
-                  <span>Step 1 · Chọn khu vực & chế độ tập</span>
-                </p>
-                <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-1">
-                  Tìm <span className="text-orange-600">Personal Trainer</span> gần bạn
-                </h1>
-                <p className="text-sm text-slate-500">
-                  Chọn tỉnh / thành hoặc dùng GPS để chúng mình gợi ý PT phù hợp hơn 🧭
-                </p>
-              </div>
+  // TanStack Query: Caching 5 phút, 0ms khi quay lại bộ lọc cũ
+  const {
+    data: searchData,
+    isLoading: loading,
+    isFetching,
+    error: queryError,
+  } = useSearchPTsQuery(searchParams);
 
-              {/* Select area */}
-              <div className="space-y-4 mb-6">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 uppercase mb-1.5">
-                    Tỉnh / thành
-                  </label>
-                  <select
-                    value={area}
-                    onChange={(e) => {
-                      setArea(e.target.value);
-                      if (e.target.value) {
-                        setCoords("");
-                        localStorage.removeItem("studentCoords");
-                      }
-                    }}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-shadow"
-                  >
-                    <option value="">-- Chọn tỉnh / thành --</option>
-                    {provinces.map((p) => (
-                      <option key={p} value={p}>
-                        {p}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+  const pts = searchData?.items || [];
+  const total = searchData?.total || 0;
+  const error = queryError
+    ? "Không thể tải danh sách huấn luyện viên. Vui lòng thử lại sau."
+    : "";
 
-                {/* Coordinates */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 uppercase mb-1.5">
-                    Hoặc nhập toạ độ
-                  </label>
-                  <input
-                    type="text"
-                    value={coords}
-                    onChange={(e) => setCoords(e.target.value)}
-                    placeholder="VD: 15.96810, 108.26340"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-shadow"
-                  />
-                </div>
-              </div>
+  // Reset all filters
+  const handleResetFilters = () => {
+    setName("");
+    setGoal("");
+    setSelectedMode("");
+    setArea("");
+    setCoords("");
+    setSortBy("best");
+    setPage(1);
+    localStorage.removeItem("studentArea");
+    localStorage.removeItem("studentCoords");
+    localStorage.removeItem("studentMode");
+    toast.info("Đã xóa tất cả bộ lọc");
+  };
 
-              <div className="flex flex-col md:flex-row gap-3 mb-5">
-                <button
-                  onClick={detectLocation}
-                  disabled={detecting}
-                  className="flex-1 inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white py-2.5 rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all"
-                >
-                  <span>📡</span>
-                  <span>{detecting ? "Đang xác định vị trí..." : "Dùng vị trí hiện tại"}</span>
-                </button>
-                <button
-                  onClick={() => {
-                    if (!coords) {
-                      alert("Chưa có toạ độ để lưu.");
-                      return;
-                    }
-                    localStorage.setItem("studentCoords", coords);
-                    alert(`Đã lưu toạ độ: ${coords}`);
-                  }}
-                  className="flex-1 inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-black text-white py-2.5 rounded-xl text-sm font-medium shadow-md hover:shadow-lg transition-all"
-                >
-                  <span>💾</span>
-                  <span>Lưu toạ độ</span>
-                </button>
-              </div>
+  const hasActiveFilters = useMemo(() => {
+    return !!(name || goal || selectedMode || area || coords || sortBy !== "best");
+  }, [name, goal, selectedMode, area, coords, sortBy]);
 
-              <button
-                onClick={handleConfirmArea}
-                disabled={!area && !coords}
-                className="w-full bg-orange-600 hover:bg-orange-500 disabled:opacity-60 text-white font-semibold py-3 rounded-xl text-base shadow-md hover:shadow-lg transition-all"
-              >
-                🔎 Xác nhận & tìm PT
-              </button>
-
-              {detectedInfo && (
-                <p className="text-center text-xs text-slate-500 mt-4">{detectedInfo}</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </MainLayout>
-    );
-  }
-
-  /* ========== MAIN PAGE ========== */
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gradient-to-b from-orange-50 via-orange-50/70 to-white text-gray-900 px-4 md:px-6 pt-24 pb-12">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 pb-20 transition-colors duration-200">
+        {/* COMPACT HERO HEADER & SEARCH BAR */}
+        <section className="bg-gradient-to-b from-orange-50/60 via-white to-slate-50/50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-950 pt-10 pb-8 border-b border-orange-100/60 dark:border-slate-800 transition-colors">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto mb-6">
+              <span className="inline-block px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400 text-xs font-bold uppercase tracking-wider mb-2">
+                Sàn Kết Nối Huấn Luyện Viên Cá Nhân
+              </span>
+              <h1 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                Tìm Huấn Luyện Viên Phù Hợp
+              </h1>
+              <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                100% PT được xác thực danh tính & chứng chỉ y học thể thao, kèm 1-1 theo thể trạng của bạn.
+              </p>
+            </div>
 
-          {/* HERO + FILTER trên poster */}
-          <section className="relative mb-10 rounded-3xl overflow-hidden shadow-xl">
-            {/* Background poster */}
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: "url('/poster2.jpg')" }} // hoặc '/poster.jpg'
-            />
-            {/* Overlay màu để chữ dễ đọc */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/10" />
-
-            {/* Nội dung hero */}
-            <div className="relative px-4 md:px-8 lg:px-10 py-7 md:py-9 flex flex-col gap-5 md:gap-6">
-              {/* Header text */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="space-y-1 text-white">
-                  <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-[11px] font-semibold tracking-wide">
-                    <span>🏋️‍♂️</span>
-                    <span>Discover your Personal Trainer</span>
-                  </p>
-                  <h1 className="text-3xl md:text-4xl font-bold tracking-tight drop-shadow-sm">
-                    Personal Trainers
-                  </h1>
-                  <p className="text-xs md:text-sm text-white/80">
-                    Khu vực hiện tại:{" "}
-                    <span className="font-semibold">
-                      {area || (coords ? "Dựa trên GPS" : "Chưa chọn")}
-                    </span>{" "}
-                    · Toạ độ:{" "}
-                    <span className="font-mono text-[11px]">
-                      {coords || "—"}
-                    </span>{" "}
-                    · Chế độ:{" "}
-                    <span className="font-semibold">
-                      {selectedMode ? modeLabels[selectedMode] : "Chưa chọn"}
-                    </span>
-                  </p>
-                </div>
-
-                <button
-                  onClick={() => setShowLocationScreen(true)}
-                  className="self-start md:self-auto inline-flex items-center gap-2 text-xs md:text-sm text-orange-600 bg-white rounded-full px-3.5 py-1.5 font-medium shadow-md hover:shadow-lg hover:text-orange-700 transition-all"
-                >
-                  ✏️ Change area & mode
-                </button>
-              </div>
-
-              {/* Filter card nằm trên poster */}
-              <div className="bg-white/90 backdrop-blur-sm border border-white/60 rounded-2xl shadow-lg px-4 py-4 md:px-6 md:py-5 flex flex-wrap gap-3 items-center">
-                <div className="flex items-center gap-2 border-r border-slate-100 pr-3">
-                  <span className="hidden md:inline text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                    Search
-                  </span>
+            {/* SEARCH TOOLBAR */}
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200/80 dark:border-slate-800 p-3 sm:p-4 space-y-3 transition-colors">
+              {/* Row 1: Search Inputs */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5">
+                {/* Search by Name */}
+                <div className="lg:col-span-4 relative flex items-center">
+                  <FaSearch className="absolute left-3.5 text-slate-400 text-xs pointer-events-none" />
                   <input
                     type="text"
-                    placeholder="Search by name..."
                     value={name}
                     onChange={(e) => {
                       setName(e.target.value);
                       setPage(1);
                     }}
-                    className="bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-2 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 min-w-[180px]"
+                    placeholder="Tìm theo tên HLV..."
+                    className="w-full pl-9 pr-8 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white dark:focus:bg-slate-800 transition"
                   />
+                  {name && (
+                    <button
+                      onClick={() => setName("")}
+                      className="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs"
+                    >
+                      <FaTimes />
+                    </button>
+                  )}
                 </div>
 
-                <select
-                  value={goal}
-                  onChange={(e) => {
-                    setGoal(e.target.value);
-                    setPage(1);
-                  }}
-                  className="bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-2 text-sm min-w-[170px] shadow-inner focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
-                >
-                  <option value="">All goals</option>
-                  {Object.keys(PackageTagLabels).map((key) => (
-                    <option key={key} value={key}>
-                      {PackageTagLabels[key] || key}
-                    </option>
-                  ))}
-                </select>
+                {/* Location Picker */}
+                <div className="lg:col-span-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsLocationModalOpen(true)}
+                    className="w-full py-2.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 hover:border-orange-500 flex items-center justify-between transition group"
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      <FaMapMarkerAlt className="text-orange-500 text-xs shrink-0" />
+                      <span className="truncate">
+                        {area || (coords ? "GPS đã chọn" : "Tất cả khu vực")}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-orange-600 dark:text-orange-400 font-bold group-hover:underline shrink-0">
+                      Chọn
+                    </span>
+                  </button>
+                </div>
 
-                <select
-                  value={selectedMode}
-                  onChange={(e) => {
-                    setSelectedMode(e.target.value);
-                    setPage(1);
-                  }}
-                  className="bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-2 text-sm min-w-[170px] shadow-inner focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
-                >
-                  <option value="">All modes</option>
-                  <option value="atPtGym">At PT's Gym</option>
-                  <option value="atClient">At Client's Home / Gym</option>
-                  <option value="atOtherGym">At Other Gym</option>
-                </select>
+                {/* Delivery Mode */}
+                <div className="lg:col-span-3">
+                  <select
+                    value={selectedMode}
+                    onChange={(e) => {
+                      setSelectedMode(e.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full py-2.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                  >
+                    <option value="">Hình thức tập: Tất cả</option>
+                    <option value="atPtGym">Tại phòng tập PT</option>
+                    <option value="atClient">Tại nhà học viên</option>
+                    <option value="atOtherGym">Tại phòng gym đối tác</option>
+                  </select>
+                </div>
 
-                <select
-                  value={sortBy}
-                  onChange={(e) => {
-                    setSortBy(e.target.value);
-                    setPage(1);
-                  }}
-                  className="bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-2 text-sm min-w-[150px] shadow-inner focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
-                >
-                  <option value="best">Best match</option>
-                  <option value="rating">Highest rating</option>
-                  <option value="price">Lowest price</option>
-                </select>
+                {/* Sort dropdown */}
+                <div className="lg:col-span-2">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => {
+                      setSortBy(e.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full py-2.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                  >
+                    <option value="best">Đánh giá cao nhất</option>
+                    <option value="price_asc">Giá: Thấp đến Cao</option>
+                    <option value="price_desc">Giá: Cao đến Thấp</option>
+                    <option value="exp_desc">Kinh nghiệm nhiều nhất</option>
+                  </select>
+                </div>
+              </div>
 
-                <div className="ml-auto flex items-center gap-3 text-xs text-slate-500">
-                  <span>
-                    {total > 0 ? `${total} trainers found` : "Chọn filter để tìm PT phù hợp"}
+              {/* Row 2: Quick Goals Pills & Action Bar */}
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2.5">
+                {/* Goal filter pills (Clean, No AI Emojis) */}
+                <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+                  <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-1 hidden sm:inline">
+                    Mục tiêu:
                   </span>
+                  {quickGoalPills.map((pill) => {
+                    const isSelected = goal === pill.key;
+                    return (
+                      <button
+                        key={pill.key}
+                        type="button"
+                        onClick={() => {
+                          setGoal(pill.key);
+                          setPage(1);
+                        }}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                          isSelected
+                            ? "bg-orange-500 text-white shadow-sm"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                        }`}
+                      >
+                        {pill.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Right controls: View Mode & Reset */}
+                <div className="flex items-center gap-2 shrink-0">
+                  {hasActiveFilters && (
+                    <button
+                      type="button"
+                      onClick={handleResetFilters}
+                      className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition flex items-center gap-1"
+                      title="Xóa tất cả bộ lọc"
+                    >
+                      <FaRedo className="text-[10px]" />
+                      <span>Xóa lọc</span>
+                    </button>
+                  )}
+
+                  {/* Grid / List Toggle */}
+                  <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <button
+                      type="button"
+                      onClick={() => setViewMode("grid")}
+                      className={`p-1.5 rounded-md text-xs transition ${
+                        viewMode === "grid"
+                          ? "bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-xs"
+                          : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                      }`}
+                      title="Xem dạng Lưới"
+                    >
+                      <FaThLarge />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setViewMode("list")}
+                      className={`p-1.5 rounded-md text-xs transition ${
+                        viewMode === "list"
+                          ? "bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-xs"
+                          : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                      }`}
+                      title="Xem dạng Danh sách"
+                    >
+                      <FaList />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* Results */}
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 max-w-5xl gap-6 mx-auto">
-              {Array.from({ length: 6 }).map((_, idx) => (
+        {/* RESULTS SECTION */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+          {/* Header info */}
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <span>Danh sách Huấn Luyện Viên</span>
+                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400">
+                  {total} HLV
+                </span>
+              </h2>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
+              Hiển thị {pts.length} / {total} HLV phù hợp
+            </p>
+          </div>
+
+          {/* SKELETON LOADER */}
+          {loading && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+              {[...Array(8)].map((_, i) => (
                 <div
-                  key={idx}
-                  className="h-[260px] bg-white border border-orange-100 rounded-3xl shadow-sm animate-pulse"
+                  key={i}
+                  className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 animate-pulse space-y-3"
                 >
-                  <div className="h-32 bg-slate-100 rounded-t-3xl" />
-                  <div className="p-4 space-y-3">
-                    <div className="h-4 bg-slate-100 rounded w-2/3" />
-                    <div className="h-3 bg-slate-100 rounded w-1/2" />
-                    <div className="h-3 bg-slate-100 rounded w-3/4" />
-                    <div className="h-8 bg-slate-100 rounded-xl w-full" />
-                  </div>
+                  <div className="h-32 bg-slate-200 dark:bg-slate-800 rounded-xl" />
+                  <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-2/3" />
+                  <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded w-1/2" />
+                  <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded-xl mt-4" />
                 </div>
               ))}
             </div>
-          ) : error ? (
-            <div className="text-center text-red-500 py-12 font-medium">
-              {error}
-            </div>
-          ) : pts.length === 0 ? (
-            <div className="text-center text-slate-500 py-16">
-              <p className="text-lg font-semibold mb-2">Không tìm thấy PT phù hợp 🧐</p>
-              <p className="text-sm text-slate-500 mb-4">
-                Thử đổi khu vực, chế độ tập hoặc bỏ bớt bộ lọc nhé.
+          )}
+
+          {/* EMPTY STATE */}
+          {!loading && pts.length === 0 && (
+            <div className="py-16 text-center bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 max-w-xl mx-auto p-8">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center text-xl mb-3">
+                <FaDumbbell />
+              </div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">
+                Không tìm thấy huấn luyện viên phù hợp
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-5 leading-relaxed">
+                Hãy thử nới lỏng bộ lọc khu vực, đổi mục tiêu thể hình hoặc xóa từ khóa tìm kiếm để xem thêm nhiều HLV khác.
               </p>
-
-              {showFallback && (
-                <div className="mt-2">
-                  <p className="text-xs mb-3">
-                    Không có PT nào gần bạn theo GPS. Bạn có thể chuyển sang tìm theo tỉnh / thành.
-                  </p>
-                  <button
-                    onClick={() => {
-                      setCoords("");
-                      fetchPTs();
-                    }}
-                    className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-full text-sm shadow-md hover:shadow-lg transition-all"
-                  >
-                    🔄 Tìm theo tỉnh / thành
-                  </button>
-                </div>
-              )}
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md transition"
+              >
+                Xem tất cả huấn luyện viên
+              </button>
             </div>
-          ) : (
+          )}
+
+          {/* TRAINERS LISTING */}
+          {!loading && pts.length > 0 && (
             <>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 max-w-5xl w-full">
-                {pts.map((pt, index) => {
-                  const rating = pt.ratingAvg || 0;
-                  const ratingRounded = Math.round(rating);
-                  const ratingCount = pt.ratingCount || 0;
+              {/* DENSE GRID VIEW (4 COLUMNS ON DESKTOP) */}
+              {viewMode === "grid" ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+                  {pts.map((pt, index) => {
+                    const rating = pt.ratingAvg || 5.0;
+                    const ratingCount = pt.ratingCount || 0;
+                    const priceText = pt.lowestPricePerSession
+                      ? `${Number(pt.lowestPricePerSession).toLocaleString("vi-VN")}₫`
+                      : "Liên hệ";
 
-                  const modes = [];
-                  if (pt.deliveryModes?.atPtGym) modes.push("atPtGym");
-                  if (pt.deliveryModes?.atClient) modes.push("atClient");
-                  if (pt.deliveryModes?.atOtherGym) modes.push("atOtherGym");
+                    const coverPhoto =
+                      pt.coverImage ||
+                      "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=600&auto=format&fit=crop";
 
-                  const priceText = pt.lowestPricePerSession
-                    ? `${Number(pt.lowestPricePerSession).toLocaleString("vi-VN")}₫ / buổi`
-                    : "Giá: liên hệ";
+                    const avatarPhoto =
+                      pt.userInfo?.avatar ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        pt.userInfo?.name || "PT"
+                      )}&background=f97316&color=ffffff`;
 
-                  return (
-                    <article
-                      key={pt._id}
-                      className="group mx-auto w-full max-w-sm bg-white rounded-3xl border border-orange-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 overflow-hidden animate-card-fade-up"
-                      style={{ animationDelay: `${index * 60}ms` }}
-                    >
-                      {/* COVER IMAGE */}
-                      <div className="relative">
-                        <img
-                          src={
-                            pt.coverImage ||
-                            pt.userInfo?.avatar ||
-                            "https://placehold.co/600x360"
-                          }
-                          alt={pt.userInfo?.name}
-                          className="w-full h-44 object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                        />
+                    const specs = pt.specialties || [];
+                    const displayedSpecs = specs.slice(0, 2);
+                    const remainingSpecsCount = specs.length - 2;
+                    {/* TRAINER CARD */}
+                    const ptSlug = pt.slug || toSlug(pt.userInfo?.name) || pt.userInfo?._id || pt._id;
 
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                        {/* BADGES */}
-                        {pt.availableForNewClients && (
-                          <span className="absolute top-3 left-3 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-emerald-600 shadow-sm">
-                            Nhận học viên mới
-                          </span>
-                        )}
-
-                        {pt.verified && (
-                          <span className="absolute top-3 right-3 rounded-full bg-orange-500 text-white px-2.5 py-1 text-[11px] font-semibold shadow">
-                            Verified
-                          </span>
-                        )}
-
-                        {/* AVATAR */}
-                        <div className="absolute -bottom-7 left-4 h-20 w-20 rounded-full border-3 border-white overflow-hidden shadow-lg bg-slate-200">
-                          <img
-                            src={
-                              pt.userInfo?.avatar ||
-                              pt.coverImage ||
-                              "https://placehold.co/120x120"
-                            }
-                            alt="avatar"
-                            className="h-full w-full object-cover object-top"
-                          />
-                        </div>
-                      </div>
-
-                      {/* CONTENT */}
-                      <div className="pt-10 pb-4 px-4 flex flex-col justify-between min-h-[200px]">
+                    return (
+                      <motion.article
+                        key={pt._id}
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.04, duration: 0.25 }}
+                        whileHover={{ y: -4 }}
+                        className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs hover:shadow-lg hover:border-orange-300 dark:hover:border-orange-500/50 transition-all duration-200 overflow-hidden flex flex-col justify-between"
+                      >
                         <div>
-                          {/* Name + exp */}
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <h3 className="text-base font-semibold text-slate-900 truncate">
-                                {pt.userInfo?.name || "Unnamed Trainer"}
-                              </h3>
-                              <p className="text-xs text-slate-500 mt-0.5">
-                                {pt.yearsExperience
-                                  ? `${pt.yearsExperience}+ năm kinh nghiệm`
-                                  : "PT cá nhân"}
-                              </p>
+                          {/* COMPACT COVER IMAGE WITH FLOATING AVATAR */}
+                          <div className="relative">
+                            <div 
+                              className="relative h-32 sm:h-36 w-full overflow-hidden bg-slate-100 dark:bg-slate-800 cursor-pointer"
+                              onClick={() => navigate(`/pt/${ptSlug}`)}
+                            >
+                              <img
+                                src={coverPhoto}
+                                alt={pt.userInfo?.name || "Trainer"}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                loading="lazy"
+                                decoding="async"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/20" />
+
+                              {/* Top Badges */}
+                              <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                                {pt.availableForNewClients && (
+                                  <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold shadow-xs">
+                                    ● Nhận HV
+                                  </span>
+                                )}
+                                {pt.verified && (
+                                  <span className="px-2 py-0.5 rounded-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm text-orange-600 dark:text-orange-400 text-[10px] font-bold shadow-xs">
+                                    Verified ✓
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Rating on cover bottom right */}
+                              <div className="absolute bottom-2 right-2.5 px-2 py-0.5 rounded-md bg-slate-950/70 backdrop-blur-sm text-amber-400 text-[11px] font-bold flex items-center gap-1">
+                                <FaStar className="text-[10px]" />
+                                <span>{rating.toFixed(1)}</span>
+                                <span className="text-slate-400 font-normal text-[10px]">
+                                  ({ratingCount})
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Floating Avatar (Fixed: Outside overflow-hidden with z-20) */}
+                            <div 
+                              className="absolute -bottom-5 left-3.5 z-20 cursor-pointer"
+                              onClick={() => navigate(`/pt/${ptSlug}`)}
+                            >
+                              <img
+                                src={avatarPhoto}
+                                alt={pt.userInfo?.name}
+                                className="w-12 h-12 rounded-xl object-cover ring-2 ring-white dark:ring-slate-900 shadow-md bg-slate-200 dark:bg-slate-700 hover:scale-105 transition"
+                                loading="lazy"
+                                decoding="async"
+                              />
                             </div>
                           </div>
 
-                          {/* Rating */}
-                          <div className="mt-2 flex items-center gap-2 text-xs">
-                            <div className="flex">
-                              {Array.from({ length: 5 }).map((_, i) => (
+                          {/* CARD BODY */}
+                          <div className="p-3.5 pt-6 space-y-2">
+                            <div>
+                              <h3 
+                                onClick={() => navigate(`/pt/${ptSlug}`)}
+                                className="text-sm font-bold text-slate-900 dark:text-white truncate group-hover:text-orange-600 dark:group-hover:text-orange-400 transition cursor-pointer"
+                              >
+                                {pt.userInfo?.name || "Huấn luyện viên"}
+                              </h3>
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                                {pt.yearsExperience ?? 1} năm kinh nghiệm
+                              </p>
+                            </div>
+
+                            {/* Location */}
+                            <div className="flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-400 truncate">
+                              <FaMapMarkerAlt className="text-orange-500 text-[10px] shrink-0" />
+                              <span className="truncate">
+                                {pt.primaryGym?.address || pt.areaNote || "TP. Hồ Chí Minh"}
+                              </span>
+                            </div>
+
+                            {/* Specialties pills */}
+                            <div className="flex flex-wrap gap-1 pt-1">
+                              {displayedSpecs.map((s, i) => (
                                 <span
                                   key={i}
-                                  className={
-                                    i < ratingRounded ? "text-amber-400" : "text-slate-300"
-                                  }
+                                  className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-medium truncate max-w-[130px]"
                                 >
-                                  ★
+                                  {s}
+                                </span>
+                              ))}
+                              {remainingSpecsCount > 0 && (
+                                <span className="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-400 text-[10px] font-medium">
+                                  +{remainingSpecsCount}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* CARD FOOTER WITH COMPACT PRICE & CTA */}
+                        <div className="p-3.5 pt-0">
+                          <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <div>
+                              <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider block">
+                                Giá từ
+                              </span>
+                              <p className="text-xs sm:text-sm font-black text-orange-600 dark:text-orange-400">
+                                {priceText}
+                                {pt.lowestPricePerSession && (
+                                  <span className="text-[10px] font-normal text-slate-400"> /buổi</span>
+                                )}
+                              </p>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => navigate(`/pt/${ptSlug}`)}
+                              className="px-3 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold shadow-xs hover:shadow transition flex items-center gap-1"
+                            >
+                              <span>Xem hồ sơ</span>
+                              <FaArrowRight className="text-[9px]" />
+                            </button>
+                          </div>
+                        </div>
+                      </motion.article>
+                    );
+                  })}
+                </div>
+              ) : (
+                /* COMPACT LIST VIEW */
+                <div className="space-y-3">
+                  {pts.map((pt, index) => {
+                    const rating = pt.ratingAvg || 5.0;
+                    const ratingCount = pt.ratingCount || 0;
+                    const priceText = pt.lowestPricePerSession
+                      ? `${Number(pt.lowestPricePerSession).toLocaleString("vi-VN")}₫`
+                      : "Liên hệ";
+
+                    const avatarPhoto =
+                      pt.userInfo?.avatar ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        pt.userInfo?.name || "PT"
+                      )}&background=f97316&color=ffffff`;
+
+                    return (
+                      <motion.article
+                        key={pt._id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.03, duration: 0.2 }}
+                        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-xs hover:shadow-md hover:border-orange-300 dark:hover:border-orange-500/50 transition flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                      >
+                        {/* Left: Avatar & Info */}
+                        <div className="flex items-center gap-3.5">
+                          <img
+                            src={avatarPhoto}
+                            alt={pt.userInfo?.name}
+                            className="w-14 h-14 rounded-2xl object-cover ring-2 ring-slate-100 dark:ring-slate-800 shrink-0"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                                {pt.userInfo?.name}
+                              </h3>
+                              {pt.verified && (
+                                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                                  Verified ✓
+                                </span>
+                              )}
+                              <div className="flex items-center gap-1 text-amber-500 text-xs font-bold">
+                                <FaStar />
+                                <span>{rating.toFixed(1)}</span>
+                                <span className="text-slate-400 font-normal">({ratingCount})</span>
+                              </div>
+                            </div>
+
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              {pt.yearsExperience ?? 1} năm kinh nghiệm • {pt.primaryGym?.name || pt.primaryGym?.address || "Hồ Chí Minh"}
+                            </p>
+
+                            {/* Specialties pills */}
+                            <div className="flex flex-wrap gap-1.5 pt-0.5">
+                              {(pt.specialties || []).map((s, i) => (
+                                <span
+                                  key={i}
+                                  className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-medium"
+                                >
+                                  {s}
                                 </span>
                               ))}
                             </div>
-
-                            {ratingCount > 0 ? (
-                              <span className="text-slate-500">
-                                {rating.toFixed(1)} · {ratingCount} đánh giá
-                              </span>
-                            ) : (
-                              <span className="text-slate-400 italic">
-                                Chưa có đánh giá
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Gym + Price */}
-                          <p className="mt-2 text-xs text-slate-600 line-clamp-2">
-                            📍 {pt.primaryGym?.name || "Khu vực linh hoạt"}
-                          </p>
-
-                          <p className="mt-1 text-sm font-semibold text-orange-600">
-                            {priceText}
-                          </p>
-
-                          {/* Tags */}
-                          <div className="mt-2 flex flex-wrap gap-1.5">
-                            {pt.specialties?.slice(0, 2).map((s) => (
-                              <span
-                                key={s}
-                                className="inline-flex items-center rounded-full bg-orange-50 text-[11px] text-orange-700 px-2 py-0.5"
-                              >
-                                {PackageTagLabels[s] || s}
-                              </span>
-                            ))}
-
-                            {modes.slice(0, 2).map((m) => (
-                              <span
-                                key={m}
-                                className="inline-flex items-center rounded-full bg-slate-50 text-[11px] text-slate-600 px-2 py-0.5"
-                              >
-                                {modeLabels[m]}
-                              </span>
-                            ))}
                           </div>
                         </div>
 
-                        {/* Button */}
-                        <button
-                          onClick={() => navigate(`/pt/${pt.userInfo?._id}`)}
-                          className="mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full py-2.5 text-sm shadow-md hover:shadow-lg transition-all"
-                        >
-                          View details
-                        </button>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
+                        {/* Right: Price & CTA */}
+                        <div className="flex sm:flex-col items-center sm:items-end justify-between gap-3 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800 shrink-0">
+                          <div className="sm:text-right">
+                            <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider block">
+                              Giá chỉ từ
+                            </span>
+                            <span className="text-base font-black text-orange-600 dark:text-orange-400">
+                              {priceText}
+                            </span>
+                            {pt.lowestPricePerSession && (
+                              <span className="text-[10px] text-slate-400 font-normal"> /buổi</span>
+                            )}
+                          </div>
 
-              {/* Pagination */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const ptSlug = pt.slug || toSlug(pt.userInfo?.name) || pt.userInfo?._id || pt._id;
+                              navigate(`/pt/${ptSlug}`);
+                            }}
+                            className="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5"
+                          >
+                            <span>Xem hồ sơ & Đặt lịch</span>
+                            <FaArrowRight className="text-[10px]" />
+                          </button>
+                        </div>
+                      </motion.article>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* PAGINATION */}
               {totalPages > 1 && (
-                <div className="mt-8 flex items-center justify-center gap-3 text-xs md:text-sm">
+                <div className="mt-10 flex items-center justify-center gap-3 text-xs sm:text-sm">
                   <button
                     disabled={page === 1}
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-slate-600 disabled:opacity-40 hover:border-orange-400 hover:text-orange-600 transition-colors"
+                    onClick={() => {
+                      setPage((p) => Math.max(1, p - 1));
+                      window.scrollTo({ top: 300, behavior: "smooth" });
+                    }}
+                    className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold disabled:opacity-40 hover:border-orange-500 hover:text-orange-600 transition shadow-xs"
                   >
-                    ← Prev
+                    ← Trang trước
                   </button>
-                  <span className="text-slate-500">
-                    Page <span className="font-semibold">{page}</span> /{" "}
-                    <span className="font-semibold">{totalPages}</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium px-2">
+                    Trang <strong className="text-slate-900 dark:text-white">{page}</strong> / {totalPages}
                   </span>
                   <button
                     disabled={page === totalPages}
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-slate-600 disabled:opacity-40 hover:border-orange-400 hover:text-orange-600 transition-colors"
+                    onClick={() => {
+                      setPage((p) => Math.min(totalPages, p + 1));
+                      window.scrollTo({ top: 300, behavior: "smooth" });
+                    }}
+                    className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold disabled:opacity-40 hover:border-orange-500 hover:text-orange-600 transition shadow-xs"
                   >
-                    Next →
+                    Trang kế tiếp →
                   </button>
                 </div>
               )}
             </>
           )}
-        </div>
+        </section>
+
+        {/* LOCATION SELECTION MODAL */}
+        <AnimatePresence>
+          {isLocationModalOpen && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                transition={{ duration: 0.2 }}
+                className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+              >
+                {/* Modal Header */}
+                <div className="p-5 pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center text-xs font-bold">
+                      <FaMapMarkerAlt />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                        Chọn Khu Vực & Định Vị
+                      </h3>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                        Tìm kiếm HLV gần khu vực của bạn
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsLocationModalOpen(false)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                  >
+                    <FaTimes className="text-xs" />
+                  </button>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-5 space-y-4">
+                  {/* Quick GPS button */}
+                  <div>
+                    <button
+                      type="button"
+                      onClick={detectLocation}
+                      disabled={detecting}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2"
+                    >
+                      <FaCrosshairs className={detecting ? "animate-spin" : ""} />
+                      <span>
+                        {detecting ? "Đang dò toạ độ GPS..." : "Dùng vị trí hiện tại (GPS)"}
+                      </span>
+                    </button>
+                    {detectedInfo && (
+                      <p className="text-center text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-2">
+                        {detectedInfo}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3 text-[10px] text-slate-400 uppercase font-bold tracking-wider">
+                    <div className="flex-1 h-px bg-slate-200 dark:bg-slate-800" />
+                    <span>Hoặc chọn Tỉnh / Thành</span>
+                    <div className="flex-1 h-px bg-slate-200 dark:bg-slate-800" />
+                  </div>
+
+                  {/* Province Selector */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                      Tỉnh / Thành phố
+                    </label>
+                    <select
+                      value={area}
+                      onChange={(e) => {
+                        setArea(e.target.value);
+                        if (e.target.value) setCoords("");
+                      }}
+                      className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                    >
+                      <option value="">-- Tất cả các tỉnh thành --</option>
+                      {provinces.map((p) => (
+                        <option key={p} value={p}>
+                          {p}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5 bg-slate-50/50 dark:bg-slate-800/40">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setArea("");
+                      setCoords("");
+                      setIsLocationModalOpen(false);
+                      setPage(1);
+                    }}
+                    className="px-3 py-2 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 transition"
+                  >
+                    Xóa vị trí
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsLocationModalOpen(false);
+                      setPage(1);
+                    }}
+                    className="px-5 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold shadow transition"
+                  >
+                    Áp dụng
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </MainLayout>
   );
