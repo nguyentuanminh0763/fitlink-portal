@@ -3,15 +3,17 @@ import { useEffect, useRef, useState } from "react";
 import { useNotification } from "~/contexts/NotificationContext";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "~/contexts/AuthProvider";
+import { useTheme } from "~/contexts/ThemeContext";
 import axiosClient from "~/api/axiosClient";
 
 export default function NotificationBell({ variant = "light" }) {
   const { items, unread, markAllRead, markOneReadLocal } = useNotification();
   const { user } = useAuth();
+  const { isDark: themeIsDark } = useTheme();
   const bellRef = useRef(null);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const isDark = variant === "dark";
+  const isDark = variant === "dark" || themeIsDark;
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -178,7 +180,11 @@ export default function NotificationBell({ variant = "light" }) {
           </ul>
            {/* 🔸 Nút View all notifications ở cuối */}
           {items.length > 0 && (
-            <div className="sticky bottom-0 text-center py-2 border-t bg-gray-50">
+            <div
+              className={`sticky bottom-0 text-center py-2.5 border-t ${
+                isDark ? "bg-slate-900/95 border-slate-800" : "bg-gray-50 border-gray-100"
+              }`}
+            >
               <a
                 href="/notifications"
                 onClick={() => setOpen(false)}

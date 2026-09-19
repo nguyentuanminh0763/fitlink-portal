@@ -9,7 +9,7 @@ const ChatAIWindow = () => {
     {
       role: "assistant",
       content:
-        "Xin chào, mình là trợ lý AI của FitLink. Bạn muốn hỏi về lịch tập, dinh dưỡng hay mục tiêu hiện tại? 💪",
+        "Xin chào! Tôi là trợ lý AI FitLink. Bạn cần tư vấn về lịch tập luyện, chế độ dinh dưỡng hay phân tích mục tiêu thể hình hôm nay?",
     },
   ]);
   const [text, setText] = useState("");
@@ -39,7 +39,7 @@ const ChatAIWindow = () => {
         ...prev,
         {
           role: "assistant",
-          content: "Xin lỗi, hiện tại mình không trả lời được. Bạn thử lại sau nhé.",
+          content: "Xin lỗi, hiện tại hệ thống AI đang quá tải. Bạn vui lòng thử lại sau giây lát nhé.",
         },
       ]);
     } finally {
@@ -55,22 +55,22 @@ const ChatAIWindow = () => {
   };
 
   return (
-    <div className="flex flex-col bg-white text-gray-800 w-full h-full rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
+    <div className="flex flex-col bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 w-full h-full rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden transition-colors">
       {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 text-white">
+      <div className="flex items-center gap-3 p-4 border-b border-slate-200 dark:border-slate-800 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800/80 transition-colors">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 text-white shadow-sm">
           <Bot size={20} />
         </div>
         <div>
-          <h2 className="font-semibold text-gray-900">Trợ lý AI FitLink</h2>
-          <p className="text-xs text-gray-500">
+          <h2 className="font-semibold text-slate-900 dark:text-white">Trợ lý AI FitLink</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Hỏi mọi thứ về tập luyện, dinh dưỡng, recovery...
           </p>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-gray-50">
+      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-slate-50/50 dark:bg-slate-950/70 transition-colors">
         {messages.map((msg, idx) => {
           const isUser = msg.role === "user";
           return (
@@ -80,21 +80,21 @@ const ChatAIWindow = () => {
             >
               <div className={`flex max-w-[75%] items-start gap-2`}>
                 {!isUser && (
-                  <div className="mt-1 flex h-7 w-7 items-center justify-center rounded-full bg-blue-500 text-white">
+                  <div className="mt-1 flex h-7 w-7 items-center justify-center rounded-full bg-blue-500 text-white shrink-0">
                     <Bot size={14} />
                   </div>
                 )}
                 <div
-                  className={`px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap shadow-sm ${
+                  className={`px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap leading-relaxed shadow-xs ${
                     isUser
-                      ? "bg-blue-500 text-white rounded-br-none"
-                      : "bg-white text-gray-800 rounded-bl-none border border-gray-200"
+                      ? "bg-blue-600 text-white rounded-br-none"
+                      : "bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-bl-none border border-slate-200/80 dark:border-slate-700/80"
                   }`}
                 >
                   {msg.content}
                 </div>
                 {isUser && (
-                  <div className="mt-1 flex h-7 w-7 items-center justify-center rounded-full bg-gray-800 text-white">
+                  <div className="mt-1 flex h-7 w-7 items-center justify-center rounded-full bg-slate-800 dark:bg-slate-700 text-white shrink-0">
                     <User size={14} />
                   </div>
                 )}
@@ -103,17 +103,17 @@ const ChatAIWindow = () => {
           );
         })}
         {loading && (
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce" />
-            <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce delay-150" />
-            <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce delay-300" />
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 pl-9">
+            <div className="h-2 w-2 rounded-full bg-slate-400 dark:bg-slate-600 animate-bounce" />
+            <div className="h-2 w-2 rounded-full bg-slate-400 dark:bg-slate-600 animate-bounce delay-150" />
+            <div className="h-2 w-2 rounded-full bg-slate-400 dark:bg-slate-600 animate-bounce delay-300" />
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-gray-200 bg-white">
+      <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors">
         <div className="flex items-center gap-2">
           <textarea
             value={text}
@@ -121,12 +121,12 @@ const ChatAIWindow = () => {
             onKeyDown={handleKeyDown}
             rows={1}
             placeholder="Đặt câu hỏi cho trợ lý AI..."
-            className="flex-1 resize-none bg-gray-100 text-gray-800 placeholder-gray-500 px-4 py-2 rounded-full outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 resize-none bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 px-4 py-2.5 rounded-full outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
           />
           <button
             onClick={handleSend}
             disabled={loading}
-            className="bg-blue-500 disabled:opacity-60 hover:bg-blue-600 transition text-white rounded-full px-4 py-2 flex items-center justify-center"
+            className="bg-blue-600 disabled:opacity-50 hover:bg-blue-700 transition text-white rounded-full px-4 py-2.5 flex items-center justify-center shadow-xs"
           >
             <SendHorizonal size={18} />
           </button>

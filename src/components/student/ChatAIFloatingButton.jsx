@@ -24,27 +24,31 @@ export default function ChatAIFloatingButton() {
         <FaRobot className="text-2xl" />
       </button>
 
-      {/* 💬 Popup chat */}
+      {/* Popup chat */}
       {open && (
         <div
           className="
             fixed bottom-24 right-6
-            w-[380px] h-[480px]
-            bg-white border border-gray-300 rounded-2xl shadow-2xl
+            w-[380px] h-[520px] max-w-[calc(100vw-2rem)]
+            bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl
             z-[9999] flex flex-col overflow-hidden
-            animate-fadeIn
+            animate-fadeIn transition-colors
           "
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-3 flex justify-between items-center">
-            <h2 className="font-semibold">AI Assistant</h2>
-            <button onClick={() => setOpen(false)} className="hover:text-gray-200">
-              <FaTimes />
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 py-3 flex justify-between items-center shrink-0">
+            <h2 className="font-semibold text-sm">FitLink AI Assistant</h2>
+            <button
+              onClick={() => setOpen(false)}
+              className="p-1 rounded-lg hover:bg-white/20 transition cursor-pointer text-white"
+              aria-label="Close"
+            >
+              <FaTimes size={15} />
             </button>
           </div>
 
           {/* Nội dung chat */}
-          <div className="flex-1 overflow-y-auto p-2 bg-gray-50">
+          <div className="flex-1 overflow-hidden bg-slate-50 dark:bg-slate-950">
             <ChatAIWindow />
           </div>
         </div>
