@@ -36,7 +36,7 @@ EXPOSE 80
 
 # Tự động kiểm tra sức khỏe Nginx định kỳ 30s
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
+  CMD wget --quiet --tries=1 --spider http://127.0.0.1/ || exit 1
 
 # Khởi động Nginx ở chế độ chạy nền
 CMD ["nginx", "-g", "daemon off;"]
