@@ -5,7 +5,5 @@ yarn-debug.log*
 yarn-error.log*
 .git
 .gitignore
-.env
-.env.*
 .DS_Store
 *.md
