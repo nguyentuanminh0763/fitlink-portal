@@ -12,8 +12,13 @@ import { GoogleLogin } from "@react-oauth/google";
 const schema = yup.object().shape({
   phone: yup
     .string()
-    .required("Số điện thoại là bắt buộc")
-    .matches(/^0\d{9}$/, "Số điện thoại không đúng định dạng"),
+    .required("Vui lòng nhập số điện thoại hoặc email")
+    .test("phone-or-email", "Email hoặc số điện thoại không hợp lệ", (value) => {
+      if (!value) return false;
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      const isPhone = /^0\d{9}$/.test(value);
+      return isEmail || isPhone;
+    }),
   password: yup
     .string()
     .required("Mật khẩu là bắt buộc")
@@ -36,6 +41,15 @@ export default function LoginPage() {
       const profile = await getProfile();
       setUser(profile);
       toast.success("Đăng nhập thành công!");
+
+      const redirectPath = sessionStorage.getItem("redirectAfterLogin");
+      sessionStorage.removeItem("redirectAfterLogin");
+
+      if (redirectPath && !redirectPath.startsWith("/login")) {
+        navigate(redirectPath);
+        return;
+      }
+
       switch (profile.role) {
         case "admin":
           navigate("/admin");
@@ -44,9 +58,10 @@ export default function LoginPage() {
           navigate("/pt");
           break;
         case "student":
-          navigate("/");
+          navigate("/home");
           break;
         default:
+          navigate("/home");
           break;
       }
     } catch (err) {
@@ -132,11 +147,11 @@ export default function LoginPage() {
             >
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-300">
-                  Phone number
+                  Phone number or Email
                 </label>
                 <input
                   type="text"
-                  placeholder="0xxxxxxxxx"
+                  placeholder="0xxxxxxxxx or user@fitlink.vn"
                   {...register("phone")}
                   className="w-full rounded-lg border border-[#333] bg-[#0e0e0e] px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-[#ff4d00] outline-none"
                 />

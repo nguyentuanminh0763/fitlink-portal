@@ -2,6 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    @apply antialiased scroll-smooth;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  html.dark body {
+    background-color: #020617;
+    color: #f8fafc;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #0f172a;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  /* Dark scrollbars */
+  html.dark ::-webkit-scrollbar-track {
+    background: #020617;
+  }
+  html.dark ::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 9999px;
+  }
+  html.dark ::-webkit-scrollbar-thumb:hover {
+    background: #334155;
+  }
+}
+
 @layer utilities {
   .animate-fade-in {
     animation: fade-in 0.3s ease-out;
@@ -54,7 +87,6 @@ main::-webkit-scrollbar-thumb {
   display: none !important;
 }
 
-
 @keyframes card-fade-up {
   0% {
     opacity: 0;
@@ -68,4 +100,212 @@ main::-webkit-scrollbar-thumb {
 
 .animate-card-fade-up {
   animation: card-fade-up 0.35s ease-out forwards;
+}
+
+/* ==========================================================================
+   React Big Calendar Professional Styling (Light & Dark Theme)
+   ========================================================================== */
+.rbc-calendar {
+  font-family: inherit;
+  color: #334155;
+}
+
+/* Light mode adjustments */
+.rbc-header {
+  padding: 10px 4px;
+  font-weight: 600;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+.rbc-header.rbc-today {
+  color: #ea580c;
+  font-weight: 700;
+  background-color: rgba(249, 115, 22, 0.05);
+}
+.rbc-today {
+  background-color: rgba(249, 115, 22, 0.04);
+}
+.rbc-toolbar button {
+  border-radius: 8px;
+  font-weight: 500;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 6px 14px;
+  transition: all 0.2s ease;
+}
+.rbc-toolbar button:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+.rbc-toolbar button.rbc-active,
+.rbc-toolbar button:active {
+  background-color: #f97316 !important;
+  border-color: #f97316 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3) !important;
+}
+
+/* ==========================================
+   REACT BIG CALENDAR DARK MODE (DEEP OVERRIDE)
+   ========================================== */
+html.dark .rbc-calendar,
+.dark .rbc-calendar {
+  color: #f1f5f9 !important;
+  background-color: transparent !important;
+}
+
+/* Calendar Containers */
+html.dark .rbc-month-view,
+html.dark .rbc-time-view,
+html.dark .rbc-agenda-view,
+.dark .rbc-month-view,
+.dark .rbc-time-view,
+.dark .rbc-agenda-view {
+  border-color: #334155 !important;
+  background-color: #0f172a !important;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Time Grid Containers */
+html.dark .rbc-time-header,
+html.dark .rbc-time-content,
+html.dark .rbc-day-slot,
+.dark .rbc-time-header,
+.dark .rbc-time-content,
+.dark .rbc-day-slot {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+/* Headers */
+html.dark .rbc-header,
+.dark .rbc-header {
+  background-color: #1e293b !important;
+  color: #cbd5e1 !important;
+  border-color: #334155 !important;
+  font-weight: 600 !important;
+  padding: 10px 4px !important;
+}
+
+/* Today's Header */
+html.dark .rbc-header.rbc-today,
+.dark .rbc-header.rbc-today {
+  background-color: rgba(249, 115, 22, 0.16) !important;
+  color: #f97316 !important;
+  font-weight: 700 !important;
+  border-bottom: 2px solid #f97316 !important;
+}
+
+/* TODAY'S COLUMN IN TIME VIEW & MONTH VIEW (Prevents Blinding White Column) */
+html.dark .rbc-today,
+html.dark .rbc-day-slot.rbc-today,
+html.dark .rbc-time-column.rbc-today,
+html.dark .rbc-day-bg.rbc-today,
+html.dark .rbc-time-header-content .rbc-today,
+.dark .rbc-today,
+.dark .rbc-day-slot.rbc-today,
+.dark .rbc-time-column.rbc-today,
+.dark .rbc-day-bg.rbc-today,
+.dark .rbc-time-header-content .rbc-today {
+  background-color: rgba(249, 115, 22, 0.08) !important;
+}
+
+/* Grid Lines / Time Slots (Eliminates harsh #f7f7f7 wireframe lines) */
+html.dark .rbc-time-slot,
+html.dark .rbc-day-slot .rbc-time-slot,
+.dark .rbc-time-slot,
+.dark .rbc-day-slot .rbc-time-slot {
+  border-top-color: #1e293b !important;
+}
+
+html.dark .rbc-timeslot-group,
+.dark .rbc-timeslot-group {
+  border-bottom-color: #334155 !important;
+}
+
+html.dark .rbc-time-gutter,
+html.dark .rbc-time-header-gutter,
+html.dark .rbc-time-view-resources .rbc-time-gutter,
+html.dark .rbc-time-view-resources .rbc-time-header-gutter,
+.dark .rbc-time-gutter,
+.dark .rbc-time-header-gutter,
+.dark .rbc-time-view-resources .rbc-time-gutter,
+.dark .rbc-time-view-resources .rbc-time-header-gutter {
+  background-color: #0f172a !important;
+  border-right-color: #334155 !important;
+}
+
+html.dark .rbc-label,
+.dark .rbc-label {
+  color: #94a3b8 !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+}
+
+/* Borders between columns and rows */
+html.dark .rbc-day-bg + .rbc-day-bg,
+html.dark .rbc-month-row + .rbc-month-row,
+html.dark .rbc-time-header-content,
+html.dark .rbc-time-content > * + * > *,
+.dark .rbc-day-bg + .rbc-day-bg,
+.dark .rbc-month-row + .rbc-month-row,
+.dark .rbc-time-header-content,
+.dark .rbc-time-content > * + * > * {
+  border-left-color: #334155 !important;
+}
+
+/* Off-range month days */
+html.dark .rbc-off-range-bg,
+.dark .rbc-off-range-bg {
+  background-color: #090d16 !important;
+}
+
+/* Toolbar */
+html.dark .rbc-toolbar,
+.dark .rbc-toolbar {
+  margin-bottom: 16px !important;
+}
+
+html.dark .rbc-toolbar .rbc-toolbar-label,
+.dark .rbc-toolbar .rbc-toolbar-label {
+  color: #f8fafc !important;
+  font-weight: 700 !important;
+  font-size: 1.125rem !important;
+}
+
+html.dark .rbc-toolbar button,
+.dark .rbc-toolbar button {
+  color: #cbd5e1 !important;
+  border: 1px solid #334155 !important;
+  background-color: #1e293b !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  padding: 6px 14px !important;
+  transition: all 0.2s ease !important;
+}
+
+html.dark .rbc-toolbar button:hover,
+.dark .rbc-toolbar button:hover {
+  background-color: #334155 !important;
+  color: #ffffff !important;
+  border-color: #475569 !important;
+}
+
+html.dark .rbc-toolbar button.rbc-active,
+html.dark .rbc-toolbar button:active,
+.dark .rbc-toolbar button.rbc-active,
+.dark .rbc-toolbar button:active {
+  background-color: #f97316 !important;
+  border-color: #ea580c !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4) !important;
+}
+
+/* Current time indicator */
+html.dark .rbc-current-time-indicator,
+.dark .rbc-current-time-indicator {
+  background-color: #f97316 !important;
+  height: 2px !important;
 }

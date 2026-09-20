@@ -1,15 +1,18 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import axiosClient from "~/api/axiosClient";
 
-/* ====== UI helpers ====== */
+/* ===================== BADGE (NEW UI) ===================== */
 function Badge({ children, className = "" }) {
   return (
-    <span className={`inline-block text-[12px] px-2 py-0.5 rounded-md font-medium ${className}`}>
+    <span
+      className={`inline-block px-2.5 py-1 text-[11px] rounded-lg border font-medium tracking-wide ${className}`}
+    >
       {children}
     </span>
   );
 }
 
+/* ===================== GENDER FORMAT ===================== */
 function GenderText({ gender }) {
   if (!gender) return "—";
   const g = String(gender).toUpperCase();
@@ -17,7 +20,7 @@ function GenderText({ gender }) {
   return map[g] || gender;
 }
 
-/* ====== PT Detail Modal ====== */
+/* ===================== DETAIL MODAL (NEW UI) ===================== */
 function PTDetailModal({ open, onClose, row }) {
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -45,7 +48,11 @@ function PTDetailModal({ open, onClose, row }) {
     try {
       setIsProcessing(true);
       await axiosClient.patch(`/admin/users/${row._id}/${action}`);
-      alert(row.isActive ? "PT account has been banned." : "PT account has been unbanned.");
+      alert(
+        row.isActive
+          ? "PT account has been banned."
+          : "PT account has been unbanned."
+      );
       onClose();
       window.location.reload();
     } catch (err) {
@@ -62,17 +69,22 @@ function PTDetailModal({ open, onClose, row }) {
 
   return (
     <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="absolute inset-0 flex items-start md:items-center justify-center p-4">
-        <div className="w-full max-w-3xl bg-slate-800 text-gray-100 rounded-2xl border border-slate-700 shadow-2xl flex flex-col max-h-[85vh]">
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      <div className="absolute inset-0 flex items-start justify-center p-4 md:items-center">
+        <div className="w-full max-w-3xl bg-slate-800 rounded-2xl border border-slate-700 shadow-[0_0_40px_rgba(0,0,0,0.45)] overflow-hidden animate-fadeIn">
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700">
-            <h3 className="text-xl font-semibold text-orange-400">PT Details</h3>
-            <button onClick={onClose} className="px-2 py-1 rounded hover:bg-slate-700">✕</button>
+          <div className="px-6 py-4 border-b border-slate-700 bg-slate-900/60">
+            <h3 className="text-xl font-semibold text-orange-400">
+              PT Details
+            </h3>
           </div>
 
           {/* Body */}
-          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+          <div className="px-6 py-6 max-h-[70vh] overflow-y-auto space-y-6 text-gray-200">
             {/* Basic info */}
             <div className="flex gap-4">
               {row.avatar ? (
@@ -84,102 +96,120 @@ function PTDetailModal({ open, onClose, row }) {
               ) : (
                 <div className="w-16 h-16 rounded-full bg-slate-700 border border-slate-600" />
               )}
+
               <div className="space-y-1 min-w-0">
-                <div className="text-2xl font-semibold truncate">{row.name || "—"}</div>
-                <div className="text-sm text-gray-400 break-all">ID: {row._id}</div>
+                <div className="text-2xl font-semibold truncate">
+                  {row.name || "—"}
+                </div>
+                <div className="text-sm text-gray-400 break-all">
+                  ID: {row._id}
+                </div>
+
                 <div className="text-sm space-y-0.5">
-                  <div><b>Email:</b> {row.email || "—"}</div>
-                  <div><b>Phone:</b> {row.phone || "—"}</div>
-                  <div><b>Gender:</b> <GenderText gender={row.gender} /></div>
+                  <div>
+                    <b>Email:</b> {row.email || "—"}
+                  </div>
+                  <div>
+                    <b>Phone:</b> {row.phone || "—"}
+                  </div>
+                  <div>
+                    <b>Gender:</b> <GenderText gender={row.gender} />
+                  </div>
                   <div className="flex items-center gap-2">
                     <b>Account Status:</b>
-                    <span className={`inline-block w-2 h-2 rounded-full ${row.isActive ? "bg-emerald-400" : "bg-red-500"}`} />
+                    <span
+                      className={`inline-block w-2 h-2 rounded-full ${
+                        row.isActive ? "bg-emerald-400" : "bg-red-500"
+                      }`}
+                    />
                     <span>{row.isActive ? "Active" : "Banned"}</span>
                   </div>
                 </div>
+
                 <div className="flex items-center gap-2 pt-1">
                   {row.verified && (
-                    <Badge className="bg-emerald-900/40 text-emerald-300 border border-emerald-800">
+                    <Badge className="bg-emerald-900/40 text-emerald-300 border-emerald-800">
                       Verified
                     </Badge>
                   )}
                   {row.availableForNewClients != null && (
-                    <Badge className="bg-blue-900/40 text-blue-300 border border-blue-800">
-                      {row.availableForNewClients ? "Accepting Clients" : "Not Accepting Clients"}
+                    <Badge className="bg-blue-900/40 text-blue-300 border-blue-800">
+                      {row.availableForNewClients
+                        ? "Accepting Clients"
+                        : "Not Accepting"}
                     </Badge>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Details */}
+            {/* More info */}
             <div className="text-gray-300 space-y-3">
-              <p><b>Experience:</b> {row.yearsExperience ?? 0} years</p>
-              <p><b>Rating:</b> {(row.ratingAvg ?? 0).toFixed(1)} ({row.ratingCount || 0})</p>
-              <p><b>Specialties:</b> {row.specialties?.length ? row.specialties.join(", ") : "—"}</p>
+              <p>
+                <b>Experience:</b> {row.yearsExperience ?? 0} years
+              </p>
+              <p>
+                <b>Rating:</b> {(row.ratingAvg ?? 0).toFixed(1)} (
+                {row.ratingCount || 0})
+              </p>
+              <p>
+                <b>Specialties:</b>{" "}
+                {row.specialties?.length ? row.specialties.join(", ") : "—"}
+              </p>
 
-              {/* Gym info */}
+              {/* Gym */}
               {row.gymName || row.gymAddress ? (
                 <div>
                   <p className="font-semibold">🏋️ Gym Information</p>
-                  <div className="ml-2 space-y-1">
-                    <div><b>Name:</b> {row.gymName || "—"}</div>
-                    <div><b>Address:</b> {row.gymAddress || "—"}</div>
-                    {row.gymCoordinates && (
-                      <div><b>Coordinates:</b> {row.gymCoordinates}</div>
-                    )}
-                    {row.gymImage && (
-                      <div className="pt-2">
-                        <p className="text-sm text-gray-400 mb-1">Gym Image:</p>
-                        <img
-                          src={row.gymImage}
-                          alt="Gym"
-                          className="rounded-lg border border-slate-600 max-h-48 object-cover"
-                        />
-                      </div>
-                    )}
+                  <div className="ml-2">
+                    <div>
+                      <b>Name:</b> {row.gymName || "—"}
+                    </div>
+                    <div>
+                      <b>Address:</b> {row.gymAddress || "—"}
+                    </div>
                   </div>
                 </div>
               ) : (
-                <p><b>Gym:</b> —</p>
+                <p>
+                  <b>Gym:</b> —
+                </p>
               )}
 
-              {/* Certificates with link */}
+              {/* Certificates */}
               <div>
-                <p className="font-semibold">📜 Certificates:</p>
+                <p className="font-semibold mb-1">📜 Certificates:</p>
                 {row.certificates?.length ? (
                   <ul className="list-disc ml-6 space-y-1">
                     {row.certificates.map((c, i) => {
-                      const name = typeof c === "string" ? c : (c?.name || `Certificate ${i + 1}`);
-                      const issuer = typeof c === "object" && c?.issuer ? ` • Issuer: ${c.issuer}` : "";
-                      const year = typeof c === "object" && c?.year ? ` • Year: ${c.year}` : "";
-                      const hasUrl = typeof c === "object" && c?.url;
+                      const name =
+                        typeof c === "string"
+                          ? c
+                          : c?.name || `Certificate ${i + 1}`;
+                      const issuer =
+                        typeof c === "object" && c?.issuer
+                          ? ` • ${c.issuer}`
+                          : "";
+                      const year =
+                        typeof c === "object" && c?.year ? ` • ${c.year}` : "";
                       return (
-                        <li key={i} className="leading-snug">
-                          <span className="mr-2">{name}{issuer}{year}</span>
-                          {hasUrl && (
-                            <a
-                              href={c.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-400 hover:text-blue-300 underline"
-                            >
-                              View certificate ↗
-                            </a>
-                          )}
+                        <li key={i}>
+                          {name} {issuer} {year}
                         </li>
                       );
                     })}
                   </ul>
                 ) : (
-                  <p className="ml-2 text-gray-400">No certificates uploaded.</p>
+                  <p className="ml-2 text-gray-400">
+                    No certificates uploaded.
+                  </p>
                 )}
               </div>
 
-              {/* System info */}
+              {/* System Info */}
               <div>
                 <p className="font-semibold">🕒 System Info</p>
-                <p className="ml-2 text-sm text-gray-400">
+                <p className="text-sm text-gray-400 ml-2">
                   Created: {fmt(row.createdAt)} <br />
                   Updated: {fmt(row.updatedAt)}
                 </p>
@@ -188,26 +218,26 @@ function PTDetailModal({ open, onClose, row }) {
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-slate-700 flex justify-between items-center">
-            <div className="text-sm text-gray-400">{isProcessing && "Processing..."}</div>
-            <div className="flex gap-3">
-              <button
-                onClick={handleBanToggle}
-                disabled={isProcessing}
-                className={`px-4 py-2 rounded-md font-medium ${
-                  row.isActive ? "bg-red-600 hover:bg-red-500" : "bg-emerald-600 hover:bg-emerald-500"
-                } text-white`}
-              >
-                {row.isActive ? "Ban (Deactivate)" : "Unban (Reactivate)"}
-              </button>
-              <button
-                onClick={onClose}
-                disabled={isProcessing}
-                className="px-4 py-2 rounded-md border border-slate-700 bg-slate-700 hover:bg-slate-600 text-white"
-              >
-                Close
-              </button>
-            </div>
+          <div className="px-6 py-4 border-t border-slate-700 flex justify-end gap-3 bg-slate-900/60">
+            <button
+              onClick={handleBanToggle}
+              disabled={isProcessing}
+              className={`px-4 py-2 rounded-lg font-medium shadow-lg ${
+                row.isActive
+                  ? "bg-red-600 hover:bg-red-500"
+                  : "bg-emerald-600 hover:bg-emerald-500"
+              }`}
+            >
+              {row.isActive ? "Ban PT" : "Unban PT"}
+            </button>
+
+            <button
+              onClick={onClose}
+              disabled={isProcessing}
+              className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 border border-slate-600"
+            >
+              Close
+            </button>
           </div>
         </div>
       </div>
@@ -215,8 +245,7 @@ function PTDetailModal({ open, onClose, row }) {
   );
 }
 
-
-/* ====== Main Component ====== */
+/* ===================== MAIN COMPONENT ===================== */
 export default function PTList() {
   const [users, setUsers] = useState([]);
   const [profiles, setProfiles] = useState([]);
@@ -228,19 +257,29 @@ export default function PTList() {
   const [sortBy, setSortBy] = useState("none");
   const [page, setPage] = useState(1);
   const pageSize = 10;
+
   const [openModal, setOpenModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
 
-  const openDetail = (row) => { setSelectedRow(row); setOpenModal(true); };
-  const closeDetail = () => { setOpenModal(false); setSelectedRow(null); };
+  const openDetail = (row) => {
+    setSelectedRow(row);
+    setOpenModal(true);
+  };
 
-  // === Fetch users & approved PT profiles (GIỮ LOGIC CŨ) ===
+  const closeDetail = () => {
+    setOpenModal(false);
+    setSelectedRow(null);
+  };
+
+  /* ===== Fetch data ===== */
   useEffect(() => {
     (async () => {
       try {
         const resUsers = await axiosClient.get("/admin/users");
         const allUsers = resUsers.data || [];
-        const ptUsers = allUsers.filter((u) => u.role === "pt" || u.role === "trainer");
+        const ptUsers = allUsers.filter(
+          (u) => u.role === "pt" || u.role === "trainer"
+        );
 
         const resOv = await axiosClient.get("/admin/overview");
         const approvedPTs = resOv.data?.approvedPTs || [];
@@ -256,7 +295,7 @@ export default function PTList() {
     })();
   }, []);
 
-  // === Map profile by userId ===
+  /* ===== Map profile by userId ===== */
   const profileByUserId = useMemo(() => {
     const m = new Map();
     for (const p of profiles) {
@@ -266,10 +305,10 @@ export default function PTList() {
     return m;
   }, [profiles]);
 
-  // === Merge user with profile ===
+  /* ===== Merge user + profile ===== */
   const data = useMemo(() => {
     return users.map((u) => {
-      const prof = profileByUserId.get(String(u._id));
+      const p = profileByUserId.get(String(u._id));
       return {
         _id: u._id,
         name: u.name || "—",
@@ -278,29 +317,29 @@ export default function PTList() {
         gender: u.gender,
         avatar: u.avatar || "",
         isActive: u.isActive,
-        verified: prof?.verified ?? false,
-        availableForNewClients: prof?.availableForNewClients ?? null,
-        specialties: prof?.specialties || [],
-        yearsExperience: prof?.yearsExperience ?? null,
-        ratingAvg: prof?.ratingAvg ?? null,
-        ratingCount: prof?.ratingCount ?? null,
-        certificates: prof?.certificates || [],
-        createdAt: prof?.createdAt || null,
-        updatedAt: prof?.updatedAt || null,
-        gymName: prof?.primaryGym?.name || "",
-        gymAddress: prof?.primaryGym?.address || "",
-        gymImage: prof?.primaryGym?.image || "",
-        gymCoordinates: prof?.primaryGym?.coordinates
-        ? `${prof.primaryGym.coordinates.lat}, ${prof.primaryGym.coordinates.lng}`
-        : null,
+
+        verified: p?.verified ?? false,
+        availableForNewClients: p?.availableForNewClients ?? null,
+        specialties: p?.specialties || [],
+        yearsExperience: p?.yearsExperience ?? null,
+        ratingAvg: p?.ratingAvg ?? null,
+        ratingCount: p?.ratingCount ?? null,
+        certificates: p?.certificates || [],
+
+        createdAt: p?.createdAt || null,
+        updatedAt: p?.updatedAt || null,
+
+        gymName: p?.primaryGym?.name || "",
+        gymAddress: p?.primaryGym?.address || "",
       };
     });
   }, [users, profileByUserId]);
 
-  // === Filter / Sort ===
+  /* ===== Filter / Sort ===== */
   const filteredSorted = useMemo(() => {
     let rows = [...data];
     const t = q.trim().toLowerCase();
+
     if (t) {
       rows = rows.filter(
         (r) =>
@@ -309,23 +348,23 @@ export default function PTList() {
           (r.phone || "").toLowerCase().includes(t)
       );
     }
-    if (filterVerified !== "all") {
-      const v = filterVerified === "true";
-      rows = rows.filter((r) => r.verified === v);
-    }
-    if (filterAvail !== "all") {
-      const v = filterAvail === "true";
-      rows = rows.filter((r) => (r.availableForNewClients ?? false) === v);
-    }
-    rows.sort((a, b) => Number(b.verified) - Number(a.verified));
-    rows.sort(
-      (a, b) =>
-        Number(Boolean(b.availableForNewClients)) -
-        Number(Boolean(a.availableForNewClients))
-    );
 
-    if (sortBy === "rating") rows.sort((a, b) => (b.ratingAvg ?? 0) - (a.ratingAvg ?? 0));
-    else if (sortBy === "exp") rows.sort((a, b) => (b.yearsExperience ?? 0) - (a.yearsExperience ?? 0));
+    if (filterVerified !== "all") {
+      rows = rows.filter((r) => r.verified === (filterVerified === "true"));
+    }
+
+    if (filterAvail !== "all") {
+      rows = rows.filter(
+        (r) => (r.availableForNewClients ?? false) === (filterAvail === "true")
+      );
+    }
+
+    if (sortBy === "rating") {
+      rows.sort((a, b) => (b.ratingAvg ?? 0) - (a.ratingAvg ?? 0));
+    } else if (sortBy === "exp") {
+      rows.sort((a, b) => (b.yearsExperience ?? 0) - (a.yearsExperience ?? 0));
+    }
+
     return rows;
   }, [data, q, filterVerified, filterAvail, sortBy]);
 
@@ -337,246 +376,274 @@ export default function PTList() {
   if (loading) return <div className="p-6">Loading...</div>;
   if (err) return <div className="p-6 text-red-500">{err}</div>;
 
+  /* ======================= RENDER UI (NEW) ======================= */
   return (
-    <div className="bg-[#0f172a] text-white min-h-screen p-6 -mt-10">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">PT List</h1>
+    <div className="bg-[#0F172A] text-white min-h-screen p-6 -mt-10">
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-orange-400 drop-shadow-[0_0_6px_rgba(249,115,22,0.4)]">
+          PT List
+        </h1>
         <p className="text-gray-400">{filteredSorted.length} results</p>
       </div>
 
-      {/* Filters */}
-      <div className="bg-slate-800 rounded-lg overflow-hidden shadow-md mb-4">
-        <div className="px-6 py-3 flex flex-wrap gap-3 items-center border-b border-slate-700">
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search by name / email / phone…"
-            className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-gray-100 placeholder:text-gray-400 min-w-[240px] focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-          <select
-            value={filterVerified}
-            onChange={(e) => setFilterVerified(e.target.value)}
-            className="bg-slate-700 border border-slate-600 rounded-lg px-2 py-2 text-gray-100"
-          >
-            <option value="all">All (verified/unverified)</option>
-            <option value="true">Verified</option>
-            <option value="false">Unverified</option>
-          </select>
-          <select
-            value={filterAvail}
-            onChange={(e) => setFilterAvail(e.target.value)}
-            className="bg-slate-700 border border-slate-600 rounded-lg px-2 py-2 text-gray-100"
-          >
-            <option value="all">All (availability)</option>
-            <option value="true">Accepting Clients</option>
-            <option value="false">Not Accepting</option>
-          </select>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="bg-slate-700 border border-slate-600 rounded-lg px-2 py-2 text-gray-100"
-          >
-            <option value="none">No Sorting</option>
-            <option value="rating">Rating (desc)</option>
-            <option value="exp">Experience (desc)</option>
-          </select>
-        </div>
+      {/* FILTERS */}
+      <div className="bg-slate-800/60 backdrop-blur-lg rounded-xl shadow-xl border border-slate-700 mb-6 p-6 flex flex-wrap gap-4">
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search PT by name / email / phone…"
+          className="bg-slate-900/70 border border-slate-700 rounded-lg px-4 py-2 text-gray-100 placeholder:text-gray-500 focus:ring-2 focus:ring-orange-500 min-w-[240px]"
+        />
 
-        {/* Table (fix width + no “bành ra”) */}
-        <div className="overflow-x-auto">
-          <table className="w-full table-fixed text-sm text-gray-300">
-            <thead className="bg-slate-700 text-gray-200">
+        <select
+          value={filterVerified}
+          onChange={(e) => setFilterVerified(e.target.value)}
+          className="bg-slate-900/70 border border-slate-700 rounded-lg px-3 py-2 text-gray-100 focus:ring-2 focus:ring-orange-500"
+        >
+          <option value="all">All (Verified / Unverified)</option>
+          <option value="true">Verified</option>
+          <option value="false">Unverified</option>
+        </select>
+
+        <select
+          value={filterAvail}
+          onChange={(e) => setFilterAvail(e.target.value)}
+          className="bg-slate-900/70 border border-slate-700 rounded-lg px-3 py-2 text-gray-100 focus:ring-2 focus:ring-orange-500"
+        >
+          <option value="all">All Availability</option>
+          <option value="true">Accepting Clients</option>
+          <option value="false">Not Accepting</option>
+        </select>
+
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="bg-slate-900/70 border border-slate-700 rounded-lg px-3 py-2 text-gray-100 focus:ring-2 focus:ring-orange-500"
+        >
+          <option value="none">No Sorting</option>
+          <option value="rating">Rating (desc)</option>
+          <option value="exp">Experience (desc)</option>
+        </select>
+      </div>
+
+      {/* TABLE */}
+      <div className="bg-slate-800/60 backdrop-blur-xl rounded-xl shadow-lg border border-slate-700 overflow-x-auto">
+        <table className="w-full table-fixed text-sm text-gray-300">
+          <thead className="bg-slate-700/80 text-gray-200 uppercase text-[12px] tracking-wide">
+            <tr>
+              <th className="px-6 py-3 text-left">Profile</th>
+              <th className="px-6 py-3 text-left">PT</th>
+              <th className="px-6 py-3 text-left">Contact</th>
+              <th className="px-6 py-3 text-left">Specialties</th>
+              <th className="px-6 py-3 text-left">Exp</th>
+              <th className="px-6 py-3 text-left">Rating</th>
+              <th className="px-6 py-3 text-left">Gym</th>
+              <th className="px-6 py-3 text-center">Certificates</th>
+              <th className="px-6 py-3 text-left">Status</th>
+              <th className="px-6 py-3 text-center">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {pageRows.length === 0 ? (
               <tr>
-                <th className="w-[10%] px-6 py-3 text-left">Profile</th>
-                <th className="w-[18%] px-6 py-3 text-left">PT</th>
-                <th className="w-[15%] px-6 py-3 text-left">Contact</th>
-                <th className="w-[13%] px-6 py-3 text-left">Specialties</th>
-                <th className="w-[8%] px-6 py-3 text-left">Exp</th>
-                <th className="w-[8%] px-6 py-3 text-left">Rating</th>
-                <th className="w-[10%] px-6 py-3 text-left">Gym</th>
-                <th className="w-[8%] px-6 py-3 text-center">Certificates</th>
-                <th className="w-[8%] px-6 py-3 text-left">Status</th>
-                <th className="w-[8%] px-6 py-3 text-center">Action</th>
+                <td
+                  colSpan={10}
+                  className="px-6 py-6 text-gray-400 text-center"
+                >
+                  No PT found.
+                </td>
               </tr>
-            </thead>
+            ) : (
+              pageRows.map((row) => (
+                <tr
+                  key={row._id}
+                  className="border-b border-slate-700 hover:bg-slate-700/40 transition-colors"
+                >
+                  {/* === PROFILE STATUS === */}
+                  <td className="px-6 py-3">
+                    <div className="flex flex-col gap-1">
+                      {row.verified && (
+                        <Badge className="bg-emerald-900/40 text-emerald-300 border-emerald-800 text-center">
+                          Verified
+                        </Badge>
+                      )}
 
-            <tbody>
-              {pageRows.length === 0 ? (
-                <tr>
-                  <td colSpan={10} className="p-6 text-center text-gray-400">
-                    No results found.
+                      {row.availableForNewClients != null && (
+                        <Badge
+                          className={`text-center ${
+                            row.availableForNewClients
+                              ? "bg-blue-900/40 text-blue-300 border-blue-800"
+                              : "bg-slate-700/60 text-slate-400 border-slate-700"
+                          }`}
+                        >
+                          {row.availableForNewClients
+                            ? "Accepting"
+                            : "Not Accepting"}
+                        </Badge>
+                      )}
+
+                      {!row.verified && row.availableForNewClients == null && (
+                        <Badge className="text-center bg-slate-700/40 text-gray-400 border border-slate-700">
+                          Unverified
+                        </Badge>
+                      )}
+                    </div>
+                  </td>
+
+                  {/* === AVATAR + NAME === */}
+                  <td className="px-6 py-3">
+                    <div className="flex items-center gap-3">
+                      {row.avatar ? (
+                        <img
+                          src={row.avatar}
+                          alt={row.name}
+                          className="w-10 h-10 rounded-full object-cover border border-slate-700"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-slate-700 border border-slate-600" />
+                      )}
+
+                      <div className="min-w-0">
+                        <div className="font-semibold text-gray-100 truncate max-w-[120px]">
+                          {row.name}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          Gender: <GenderText gender={row.gender} />
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* === CONTACT === */}
+                  <td className="px-6 py-3">
+                    <div className="truncate max-w-[170px]">
+                      {row.email || "—"}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {row.phone || ""}
+                    </div>
+                  </td>
+
+                  {/* === SPECIALTIES === */}
+                  <td className="px-6 py-3">
+                    {row.specialties.length ? (
+                      <div className="flex flex-wrap gap-1 max-w-[220px]">
+                        {row.specialties.map((s, i) => (
+                          <Badge
+                            key={i}
+                            className="bg-indigo-900/40 text-indigo-300 border-indigo-800"
+                          >
+                            {s}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+
+                  {/* EXP */}
+                  <td className="px-6 py-3">
+                    {row.yearsExperience != null
+                      ? `${row.yearsExperience} yrs`
+                      : "—"}
+                  </td>
+
+                  {/* RATING */}
+                  <td className="px-6 py-3">
+                    {row.ratingAvg != null ? (
+                      <span className="inline-flex items-center gap-1">
+                        <span className="font-semibold">
+                          {Number(row.ratingAvg).toFixed(1)}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          ({row.ratingCount || 0})
+                        </span>
+                      </span>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+
+                  {/* GYM */}
+                  <td className="px-6 py-3">
+                    {row.gymName || row.gymAddress ? (
+                      <div className="space-y-0.5">
+                        <div className="font-medium truncate max-w-[180px]">
+                          {row.gymName || "—"}
+                        </div>
+                        <div className="text-xs text-gray-400 max-w-[200px] whitespace-pre-line break-words">
+                          {row.gymAddress}
+                        </div>
+                      </div>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+
+                  {/* CERTIFICATES */}
+                  <td className="px-6 py-3 text-center">
+                    {row.certificates.length ? (
+                      <span>{row.certificates.length} cert</span>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+
+                  {/* STATUS */}
+                  <td className="px-6 py-3">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`w-2 h-2 rounded-full ${
+                          row.isActive ? "bg-emerald-400" : "bg-red-500"
+                        }`}
+                      />
+                      {row.isActive ? "Active" : "Banned"}
+                    </div>
+                  </td>
+
+                  {/* ACTION */}
+                  <td className="px-6 py-3 text-center">
+                    <button
+                      onClick={() => openDetail(row)}
+                      className="bg-orange-600 hover:bg-orange-500 text-white text-sm px-3 py-1.5 rounded-md"
+                    >
+                      View
+                    </button>
                   </td>
                 </tr>
-              ) : (
-                pageRows.map((row) => (
-                  <tr key={row._id} className="border-b border-slate-700 hover:bg-slate-700/40">
-                    {/* Profile status */}
-                    <td className="px-6 py-3">
-                      <div className="flex flex-col gap-1">
-                        {row.verified && (
-                          <Badge className="bg-emerald-900/40 text-emerald-300 border border-emerald-800 text-center">
-                            Verified
-                          </Badge>
-                        )}
-                        {row.availableForNewClients != null && (
-                          <Badge
-                            className={`text-center ${
-                              row.availableForNewClients
-                                ? "bg-blue-900/40 text-blue-300 border border-blue-800"
-                                : "bg-slate-800/60 text-slate-400 border border-slate-700"
-                            }`}
-                          >
-                            {row.availableForNewClients ? "Accepting Clients" : "Not Accepting"}
-                          </Badge>
-                        )}
-                        {!row.verified && row.availableForNewClients == null && (
-                          <Badge className="text-center bg-slate-700/40 text-gray-400 border border-slate-700">
-                            Unverified
-                          </Badge>
-                        )}
-                      </div>
-                    </td>
+              ))
+            )}
+          </tbody>
+        </table>
 
-                    {/* PT basic */}
-                    <td className="px-6 py-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        {row.avatar ? (
-                          <img
-                            src={row.avatar}
-                            alt={row.name}
-                            className="w-10 h-10 rounded-full object-cover border border-slate-700"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-slate-700 border border-slate-600" />
-                        )}
-                        <div className="min-w-0">
-                          <div className="font-medium text-gray-100 truncate max-w-[120px]">
-                            {row.name}
-                          </div>
-                          <div className="text-xs text-gray-400">
-                            Gender: <GenderText gender={row.gender} />
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Contact */}
-                    <td className="px-6 py-3">
-                      <div className="truncate max-w-[170px]">{row.email || "—"}</div>
-                      <div className="text-xs text-gray-400">{row.phone || ""}</div>
-                    </td>
-
-                    {/* Specialties */}
-                    <td className="px-6 py-3">
-                      {row.specialties.length ? (
-                        <div className="flex flex-wrap gap-1 max-w-[220px]">
-                          {row.specialties.map((s, i) => (
-                            <Badge
-                              key={i}
-                              className="bg-indigo-900/40 text-indigo-300 border border-indigo-800"
-                            >
-                              {s}
-                            </Badge>
-                          ))}
-                        </div>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-
-                    {/* Experience */}
-                    <td className="px-6 py-3">{row.yearsExperience != null ? `${row.yearsExperience} yrs` : "—"}</td>
-
-                    {/* Rating */}
-                    <td className="px-6 py-3">
-                      {row.ratingAvg != null ? (
-                        <span className="inline-flex items-center gap-1">
-                          <span className="font-semibold">{Number(row.ratingAvg).toFixed(1)}</span>
-                          <span className="text-xs text-gray-400">({row.ratingCount || 0})</span>
-                        </span>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-
-                    {/* Gym */}
-                    <td className="px-6 py-3">
-                      {row.gymName || row.gymAddress ? (
-                        <div className="space-y-0.5">
-                          <div className="font-medium truncate max-w-[180px]">{row.gymName || "—"}</div>
-                          <div className="text-xs text-gray-400 max-w-[200px] whitespace-pre-line break-words">
-                            {row.gymAddress
-                              ? row.gymAddress
-                                  .split(",")
-                                  .map((part) => part.trim())
-                                  .join("\n")
-                              : "—"}
-                          </div>
-                        </div>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-
-                    {/* Certificates (center) */}
-                    <td className="px-6 py-3 text-center">
-                      {row.certificates.length ? (
-                        <span className="text-sm">{row.certificates.length} certificates</span>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-
-                    {/* Account Status */}
-                    <td className="px-6 py-3">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`inline-block w-2 h-2 rounded-full ${
-                            row.isActive ? "bg-emerald-400" : "bg-red-500"
-                          }`}
-                        />
-                        <span>{row.isActive ? "Active" : "Banned"}</span>
-                      </div>
-                    </td>
-
-                    {/* Action */}
-                    <td className="px-6 py-3 text-center">
-                      <button
-                        onClick={() => openDetail(row)}
-                        className="inline-flex items-center justify-center bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium px-3 py-1.5 rounded-md shadow-sm"
-                      >
-                        View Details
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-slate-700">
+        {/* PAGINATION */}
+        <div className="flex justify-end items-center px-6 py-4 border-t border-slate-700 gap-3">
           <button
             disabled={page === 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="border border-slate-700 bg-slate-700 text-gray-100 hover:bg-slate-600 disabled:opacity-50 rounded-md px-3 py-1"
+            className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg border border-slate-600 text-gray-200 disabled:opacity-40"
           >
-            Previous
+            Prev
           </button>
-          <span className="text-sm text-gray-300">Page {page}/{totalPages}</span>
+
+          <span className="text-sm text-gray-300">
+            Page {page}/{totalPages}
+          </span>
+
           <button
             disabled={page === totalPages}
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            className="border border-slate-700 bg-slate-700 text-gray-100 hover:bg-slate-600 disabled:opacity-50 rounded-md px-3 py-1"
+            className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg border border-slate-600 text-gray-200 disabled:opacity-40"
           >
             Next
           </button>
         </div>
       </div>
 
-      {/* Detail Modal */}
+      {/* MODAL */}
       <PTDetailModal open={openModal} onClose={closeDetail} row={selectedRow} />
     </div>
   );

@@ -1,6 +1,6 @@
 // src/components/chat/ChatWindow.jsx
 import React, { useEffect, useState, useRef } from "react";
-import { SendHorizonal } from "lucide-react";
+import { SendHorizonal, MessageSquare } from "lucide-react";
 import { useSocket } from "~/contexts/SocketContext";
 import { getMessagesByRoom } from "~/services/messageService";
 
@@ -78,24 +78,30 @@ const ChatWindow = ({ self, peer, role }) => {
 
   if (!peer)
     return (
-      <div className="flex items-center justify-center flex-1 text-gray-500 bg-white">
-        👈 Chọn {role === "pt" ? "học viên" : "huấn luyện viên"} để bắt đầu trò chuyện
+      <div className="flex flex-col items-center justify-center flex-1 h-full text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-slate-900/40 p-8 text-center">
+        <div className="w-14 h-14 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3 text-slate-400 dark:text-slate-500 shadow-xs">
+          <MessageSquare size={24} />
+        </div>
+        <p className="font-semibold text-slate-700 dark:text-slate-300 text-base">Chưa chọn cuộc trò chuyện</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs">
+          Chọn {role === "pt" ? "học viên" : "huấn luyện viên"} từ danh sách bên trái để bắt đầu trao đổi lịch tập và chế độ ăn.
+        </p>
       </div>
     );
 
   return (
-    <div className="flex flex-col bg-white text-gray-800 w-full h-full overflow-hidden">
+    <div className="flex flex-col bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 w-full h-full overflow-hidden transition-colors">
       {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+      <div className="flex items-center gap-3 p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/80 flex-shrink-0 transition-colors">
         <img
           src={peer.avatar || "/default-avatar.png"}
           alt="avatar"
-          className="w-10 h-10 rounded-full object-cover border border-gray-300"
+          className="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-slate-700 shadow-xs"
         />
         <div>
-          <h2 className="font-semibold text-gray-900">{peer.name}</h2>
+          <h2 className="font-semibold text-slate-900 dark:text-white">{peer.name}</h2>
           {isTyping && (
-            <p className="text-xs text-blue-500 animate-pulse">Đang nhập...</p>
+            <p className="text-xs text-blue-500 animate-pulse">Đang soạn tin nhắn...</p>
           )}
         </div>
       </div>
@@ -103,7 +109,7 @@ const ChatWindow = ({ self, peer, role }) => {
       {/* Messages */}
       <div
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto px-4 py-3 space-y-2 bg-gray-50">
+        className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5 bg-slate-50/40 dark:bg-slate-950/70 transition-colors">
         {messages.map((msg, idx) => {
           const senderId = msg.sender?._id || msg.sender || msg.senderId;
           const mine = String(senderId) === String(self._id);
@@ -113,9 +119,9 @@ const ChatWindow = ({ self, peer, role }) => {
               className={`flex ${mine ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`px-4 py-2 rounded-2xl max-w-[70%] text-sm shadow-sm ${mine
-                    ? "bg-blue-500 text-white rounded-br-none"
-                    : "bg-gray-200 text-gray-800 rounded-bl-none"
+                className={`px-4 py-2 rounded-2xl max-w-[70%] text-sm shadow-xs ${mine
+                    ? "bg-blue-600 text-white rounded-br-none"
+                    : "bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-bl-none border border-transparent dark:border-slate-700/60"
                   }`}
               >
                 {msg.text}
@@ -127,17 +133,17 @@ const ChatWindow = ({ self, peer, role }) => {
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-gray-200 flex gap-2 bg-white flex-shrink-0">
+      <div className="p-4 border-t border-slate-200 dark:border-slate-800 flex gap-2 bg-white dark:bg-slate-900 flex-shrink-0 transition-colors">
         <input
           value={text}
           onChange={handleTypingInput}
           placeholder="Nhập tin nhắn..."
-          className="flex-1 bg-gray-100 text-gray-800 placeholder-gray-500 px-4 py-2 rounded-full outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 px-4 py-2.5 rounded-full outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
         <button
           onClick={sendMessage}
-          className="bg-blue-500 hover:bg-blue-600 transition text-white rounded-full px-4 py-2 flex items-center justify-center"
+          className="bg-blue-600 hover:bg-blue-700 transition text-white rounded-full px-4 py-2 flex items-center justify-center shadow-xs"
         >
           <SendHorizonal size={18} />
         </button>

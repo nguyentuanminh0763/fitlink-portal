@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { FaComments } from "react-icons/fa";
 import MainLayout from "~/layouts/MainLayout";
 import ChatSidebar from "~/components/chat/ChatSidebar";
 import ChatWindow from "~/components/chat/ChatWindow";
@@ -51,21 +52,21 @@ export default function MessagePage() {
 
   return (
     <MainLayout>
-      <section className="px-6 pb-10">
+      <section className="px-4 sm:px-6 pt-6 pb-12 bg-slate-50 dark:bg-slate-950 min-h-screen transition-colors duration-200">
         {/* Tiêu đề */}
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">
-            💬 Tin nhắn của bạn
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-white flex items-center justify-center gap-2.5">
+            <FaComments className="text-orange-500 w-7 h-7" /> Tin nhắn của bạn
           </h1>
-          <p className="text-gray-500 text-sm mt-2">
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">
             Trò chuyện trực tiếp với huấn luyện viên cá nhân của bạn
           </p>
         </div>
 
         {/* Chat box */}
-        <div className="flex rounded-2xl border border-gray-200 shadow-lg overflow-hidden bg-white min-h-[60vh] max-h-[calc(100vh-5rem-3rem)]">
+        <div className="max-w-6xl mx-auto flex rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden bg-white dark:bg-slate-900 min-h-[65vh] max-h-[calc(100vh-5rem-3rem)]">
           {/* Sidebar */}
-          <div className="w-[300px] border-r border-gray-100 bg-gray-50 overflow-y-auto">
+          <div className="w-[300px] border-r border-slate-200 dark:border-slate-800 overflow-y-auto">
             <ChatSidebar
               list={pts}
               role="student"

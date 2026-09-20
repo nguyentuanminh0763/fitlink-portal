@@ -54,10 +54,10 @@ export default function AboutHero() {
         <SwiperSlide key={i}>
           <section className="relative h-[520px] md:h-[580px] overflow-hidden">
             {/* background gradient */}
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-50 via-white to-amber-50" />
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-50 via-white to-amber-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-200" />
             {/* soft shapes */}
-            <div className="pointer-events-none absolute -right-24 -top-24 w-[520px] h-[520px] rounded-full bg-gradient-to-br from-orange-200/60 to-amber-100 blur-2xl" />
-            <div className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-[58%] h-[120%] bg-gradient-to-l from-orange-100 via-orange-50 to-transparent rounded-l-[48px]" />
+            <div className="pointer-events-none absolute -right-24 -top-24 w-[520px] h-[520px] rounded-full bg-gradient-to-br from-orange-200/60 to-amber-100 dark:from-orange-950/30 dark:to-amber-950/20 blur-2xl" />
+            <div className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-[58%] h-[120%] bg-gradient-to-l from-orange-100 via-orange-50 to-transparent dark:from-orange-950/20 dark:via-slate-900/40 dark:to-transparent rounded-l-[48px]" />
 
             {/* main content */}
             <div className="relative z-10 mx-auto h-full max-w-[1200px] px-6 md:px-10 lg:px-14 flex flex-col md:flex-row items-center gap-10 md:gap-8">
@@ -65,20 +65,20 @@ export default function AboutHero() {
               <div className="flex-1 max-w-2xl pt-6 md:pt-0">
                 {/* top tag */}
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-orange-100 text-orange-700 px-3 py-1 text-xs font-semibold">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 px-3 py-1 text-xs font-semibold">
                     <span className="inline-block w-1.5 h-1.5 rounded-full bg-orange-500" />
                     {s.badge}
                   </div>
-                  <span className="hidden sm:inline text-xs font-medium text-gray-500">
+                  <span className="hidden sm:inline text-xs font-medium text-gray-500 dark:text-slate-400">
                     {s.tag}
                   </span>
                 </div>
 
-                <h1 className="whitespace-pre-line text-3xl sm:text-4xl lg:text-[44px] font-extrabold tracking-tight text-gray-900 leading-[1.15]">
+                <h1 className="whitespace-pre-line text-3xl sm:text-4xl lg:text-[44px] font-extrabold tracking-tight text-gray-900 dark:text-white leading-[1.15]">
                   {s.title}
                 </h1>
 
-                <p className="mt-5 text-base sm:text-lg text-gray-600 max-w-xl">
+                <p className="mt-5 text-base sm:text-lg text-gray-600 dark:text-slate-300 max-w-xl">
                   {s.desc}
                 </p>
 
@@ -95,28 +95,28 @@ export default function AboutHero() {
                   <button
                     type="button"
                     onClick={() => scrollToSection(s.secondaryTargetId)}
-                    className="px-7 py-3 rounded-full text-sm sm:text-base font-semibold text-gray-800 border border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition"
+                    className="px-7 py-3 rounded-full text-sm sm:text-base font-semibold text-gray-800 dark:text-slate-200 border border-gray-300 dark:border-slate-700 hover:border-gray-400 dark:hover:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-800 transition"
                   >
                     {s.secondaryCta}
                   </button>
                 </div>
 
                 {/* stats row – giữ để About có số liệu */}
-                <div className="mt-6 grid grid-cols-3 max-w-xs text-xs sm:text-sm text-gray-600">
+                <div className="mt-6 grid grid-cols-3 max-w-xs text-xs sm:text-sm text-gray-600 dark:text-slate-400">
                   <div>
-                    <div className="font-semibold text-gray-900 text-base sm:text-lg">
+                    <div className="font-semibold text-gray-900 dark:text-white text-base sm:text-lg">
                       50+
                     </div>
                     <div>Certified PTs</div>
                   </div>
                   <div>
-                    <div className="font-semibold text-gray-900 text-base sm:text-lg">
+                    <div className="font-semibold text-gray-900 dark:text-white text-base sm:text-lg">
                       1.2k
                     </div>
                     <div>Active members</div>
                   </div>
                   <div>
-                    <div className="font-semibold text-gray-900 text-base sm:text-lg">
+                    <div className="font-semibold text-gray-900 dark:text-white text-base sm:text-lg">
                       92%
                     </div>
                     <div>See progress in 8 weeks</div>
@@ -127,7 +127,7 @@ export default function AboutHero() {
               {/* right image / card */}
               <div className="flex-1 flex justify-center md:justify-end w-full">
                 <div className="relative w-full max-w-[420px]">
-                  <div className="absolute -right-6 -bottom-6 w-36 h-36 rounded-3xl bg-gradient-to-br from-orange-200 to-amber-100" />
+                  <div className="absolute -right-6 -bottom-6 w-36 h-36 rounded-3xl bg-gradient-to-br from-orange-200 to-amber-100 dark:from-orange-950/40 dark:to-amber-950/30" />
                   <img
                     src={s.image}
                     alt="FitLink coaching team"
@@ -135,13 +135,13 @@ export default function AboutHero() {
                   />
 
                   {/* small glass card */}
-                  <div className="absolute left-4 bottom-4 bg-white/90 backdrop-blur-md rounded-2xl px-4 py-3 shadow-lg flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 text-lg font-bold">
+                  <div className="absolute left-4 bottom-4 bg-white/90 dark:bg-slate-900/90 dark:border dark:border-slate-800 backdrop-blur-md rounded-2xl px-4 py-3 shadow-lg flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-950/80 flex items-center justify-center text-orange-600 dark:text-orange-400 text-lg font-bold">
                       PT
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Behind FitLink</p>
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-xs text-gray-500 dark:text-slate-400">Behind FitLink</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">
                         Real coaches, real stories
                       </p>
                     </div>

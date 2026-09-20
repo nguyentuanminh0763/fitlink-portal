@@ -3,7 +3,6 @@ import { useAuth } from '../contexts/AuthProvider';
 
 export default function PrivateRoute({ children, allowedRoles }) {
   const { user } = useAuth();
-  console.log('PrivateRoute- User:', user);
   
 
   if (!user) {
