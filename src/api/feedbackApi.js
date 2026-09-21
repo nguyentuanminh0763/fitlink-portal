@@ -1,8 +1,6 @@
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL + "/api/feedbacks";
+import axiosClient from "./axiosClient";
 
 export const feedbackApi = {
-  create: (data) => axios.post(API_URL, data),
-  getByPT: (ptId) => axios.get(`${API_URL}/pt/${ptId}`),
+  create: (data) => axiosClient.post("/feedbacks", data),
+  getByPT: (ptId) => axiosClient.get(`/feedbacks/pt/${ptId}`),
 };

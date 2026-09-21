@@ -8,23 +8,17 @@ WORKDIR /app
 # Copy file định nghĩa thư viện trước để tận dụng Docker Cache
 COPY package*.json ./
 
-# Cài đặt thư viện
+# Cài đặt thư viện sạch
 RUN npm ci --no-audit
 
 # Copy toàn bộ mã nguồn Frontend vào
 COPY . .
 
-# Build Arguments (Senior 12-Factor Standard: Inject config at build time)
-ARG VITE_API_URL=http://localhost:3000
-ARG VITE_API_BASE_URL=http://localhost:3000/api
-ARG VITE_SOCKET_URL=http://localhost:3000
+# Build Arguments cho các Client Public Keys (3rd-party keys cố định)
 ARG VITE_GG_CLIENT_ID=686626573895-23r6hpi2kk7elc411k0vggur97kd2ien.apps.googleusercontent.com
 ARG VITE_GEOAPIFY_KEY=bc5b64e272824d95874fd2dfcd0dec31
 ARG VITE_MAPTILER_KEY=gfSEv8eHGG3JerPboSmT
 
-ENV VITE_API_URL=$VITE_API_URL
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
-ENV VITE_SOCKET_URL=$VITE_SOCKET_URL
 ENV VITE_GG_CLIENT_ID=$VITE_GG_CLIENT_ID
 ENV VITE_GEOAPIFY_KEY=$VITE_GEOAPIFY_KEY
 ENV VITE_MAPTILER_KEY=$VITE_MAPTILER_KEY
@@ -37,11 +31,14 @@ RUN npm run build
 # ================================================================
 FROM nginx:alpine AS runner
 
-# Xóa trang mặc định chào mừng của Nginx
-RUN rm -rf /usr/share/nginx/html/*
+# Xóa cấu hình và trang mặc định chào mừng của Nginx
+RUN rm -rf /usr/share/nginx/html/* /etc/nginx/conf.d/default.conf
 
-# Copy file cấu hình Nginx của chúng ta vào thư mục cấu hình Nginx
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Cấu hình envsubst: chỉ inject BACKEND_URL, giữ nguyên các biến nội bộ của Nginx ($uri, $host, ...)
+ENV NGINX_ENVSUBST_FILTER="BACKEND_URL"
+
+# Copy template vào thư mục templates của Nginx (docker-entrypoint tự động chạy envsubst ra /etc/nginx/conf.d/default.conf)
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 
 # Bốc thư mục dist/ từ Tầng 1 sang thư mục phục vụ web của Nginx
 COPY --from=builder /app/dist /usr/share/nginx/html
@@ -53,5 +50,5 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://127.0.0.1/ || exit 1
 
-# Khởi động Nginx ở chế độ chạy nền
+# Khởi động Nginx ở chế độ foreground
 CMD ["nginx", "-g", "daemon off;"]

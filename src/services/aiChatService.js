@@ -1,7 +1,5 @@
 // src/services/aiChatService.js
-import axios from "axios";
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+import axiosClient from "../api/axiosClient";
 
 /**
  * frontendMessages: mảng [{ role: 'user' | 'assistant', content: '...' }]
@@ -16,16 +14,10 @@ export const sendAIChat = async (frontendMessages) => {
   const last = frontendMessages[frontendMessages.length - 1];
   const history = frontendMessages.slice(0, -1); // phần còn lại làm history
 
-  const res = await axios.post(
-    `${API_BASE}/ai/chat`,
-    {
-      message: last.content,
-      history, // [{ role, content }]
-    },
-    {
-      withCredentials: true, // cần để authMiddleware đọc cookie
-    }
-  );
+  const res = await axiosClient.post("/ai/chat", {
+    message: last.content,
+    history, // [{ role, content }]
+  });
 
   // Backend trả về { reply: '...' }
   return {

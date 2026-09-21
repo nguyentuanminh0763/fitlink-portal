@@ -1,42 +1,26 @@
-import axios from "axios";
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000";
-const MATERIALS_URL = `${API_BASE}/api/pt/materials`;
+import axiosClient from "../api/axiosClient";
 
 export async function getMyMaterials(params = {}) {
-  const res = await axios.get(MATERIALS_URL, {
-    params,
-    withCredentials: true,
-  });
+  const res = await axiosClient.get("/pt/materials", { params });
   return res.data;
 }
 
 export async function createMaterial(payload) {
-  const res = await axios.post(MATERIALS_URL, payload, {
-    withCredentials: true,
-  });
+  const res = await axiosClient.post("/pt/materials", payload);
   return res.data;
 }
 
 export async function updateMaterial(id, payload) {
-  const res = await axios.put(`${MATERIALS_URL}/${id}`, payload, {
-    withCredentials: true,
-  });
+  const res = await axiosClient.put(`/pt/materials/${id}`, payload);
   return res.data;
 }
 
 export async function deleteMaterial(id) {
-  const res = await axios.delete(`${MATERIALS_URL}/${id}`, {
-    withCredentials: true,
-  });
+  const res = await axiosClient.delete(`/pt/materials/${id}`);
   return res.data;
 }
 
 export async function shareMaterial(id, packageIds) {
-  const res = await axios.post(
-    `${MATERIALS_URL}/${id}/share`,
-    { packageIds },
-    { withCredentials: true }
-  );
+  const res = await axiosClient.post(`/pt/materials/${id}/share`, { packageIds });
   return res.data;
 }
