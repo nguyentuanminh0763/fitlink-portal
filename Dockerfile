@@ -9,7 +9,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Cài đặt thư viện
-RUN npm install --no-audit
+RUN npm ci --no-audit
 
 # Copy toàn bộ mã nguồn Frontend vào
 COPY . .
