@@ -8,9 +8,11 @@
 
 - **Core:** React 19, Vite 6, React Router v7
 - **Styling & UI:** TailwindCSS 3, Lucide React, Framer Motion, Swiper, Lottie React
-- **State & Communication:** React Context API, Socket.IO Client, Axios (with httpOnly cookie interceptor)
+- **Data Fetching & Caching:** TanStack Query v5 (RAM caching with 5-minute `staleTime`, zero-latency tab switching)
+- **State & Communication:** React Context API, Socket.IO Client, Axios (with httpOnly cookie credentials)
 - **Forms & Validation:** React Hook Form + Yup resolver
 - **Data Visualization & Scheduling:** FullCalendar, React Big Calendar, Chart.js, React Leaflet / MapLibre GL
+- **Containerization:** Multi-stage Dockerfile + Nginx Alpine reverse proxy
 - **Third-party Services:** Google OAuth (@react-oauth/google), PayOS Payment Gateway
 
 ---
@@ -58,7 +60,23 @@ npm run build
 npm run preview
 ```
 
+### 5. Docker Deployment
+```bash
+# Build production Nginx container
+docker build -t fitlink-frontend .
+
+# Or run via Docker Compose in the root workspace
+docker compose up -d fitlink-frontend
+```
+
 ---
+
+## ⚡ Performance & Security Highlights
+
+1. **Route-Level Code Splitting:** Over 42 application pages use `React.lazy` and `Suspense`, ensuring only necessary JavaScript chunks are downloaded for the active view.
+2. **TanStack Query In-Memory Caching:** Instant transitions across pages (`staleTime: 5 min`) without redundant API queries.
+3. **Anti-XSS Protection:** Notifications avoid `dangerouslySetInnerHTML` and strictly render safe JSX text nodes.
+4. **HttpOnly Cookie Authentication:** API credentials are handled exclusively via secure cookies with `withCredentials: true`, preventing client script access to sensitive tokens.
 
 ## 🔐 Route Security Matrix
 
