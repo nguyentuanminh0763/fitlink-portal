@@ -14,6 +14,13 @@ pr:
 pool:
   name: 'Default'
 
+# Senior Standard: Decouple configuration from pipeline logic via variables
+# Values defined here act as defaults, fully overridable via Azure DevOps Library / Pipeline UI
+variables:
+  VITE_API_URL: 'https://fitlink-api.thankfulpond-53ca2df8.southeastasia.azurecontainerapps.io'
+  VITE_API_BASE_URL: 'https://fitlink-api.thankfulpond-53ca2df8.southeastasia.azurecontainerapps.io/api'
+  VITE_SOCKET_URL: 'https://fitlink-api.thankfulpond-53ca2df8.southeastasia.azurecontainerapps.io'
+
 steps:
 - task: NodeTool@0
   inputs:
@@ -36,7 +43,7 @@ steps:
     repository: 'fitlink-portal'
     command: 'buildAndPush'
     Dockerfile: '**/Dockerfile'
-    arguments: '--build-arg VITE_API_URL=https://fitlink-api.thankfulpond-53ca2df8.southeastasia.azurecontainerapps.io --build-arg VITE_API_BASE_URL=https://fitlink-api.thankfulpond-53ca2df8.southeastasia.azurecontainerapps.io/api --build-arg VITE_SOCKET_URL=https://fitlink-api.thankfulpond-53ca2df8.southeastasia.azurecontainerapps.io'
+    arguments: '--build-arg VITE_API_URL=$(VITE_API_URL) --build-arg VITE_API_BASE_URL=$(VITE_API_BASE_URL) --build-arg VITE_SOCKET_URL=$(VITE_SOCKET_URL)'
     tags: |
       $(Build.BuildId)
       latest
