@@ -14,6 +14,21 @@ RUN npm ci --no-audit
 # Copy toàn bộ mã nguồn Frontend vào
 COPY . .
 
+# Build Arguments (Senior 12-Factor Standard: Inject config at build time)
+ARG VITE_API_URL=http://localhost:3000
+ARG VITE_API_BASE_URL=http://localhost:3000/api
+ARG VITE_SOCKET_URL=http://localhost:3000
+ARG VITE_GG_CLIENT_ID=686626573895-23r6hpi2kk7elc411k0vggur97kd2ien.apps.googleusercontent.com
+ARG VITE_GEOAPIFY_KEY=bc5b64e272824d95874fd2dfcd0dec31
+ARG VITE_MAPTILER_KEY=gfSEv8eHGG3JerPboSmT
+
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_SOCKET_URL=$VITE_SOCKET_URL
+ENV VITE_GG_CLIENT_ID=$VITE_GG_CLIENT_ID
+ENV VITE_GEOAPIFY_KEY=$VITE_GEOAPIFY_KEY
+ENV VITE_MAPTILER_KEY=$VITE_MAPTILER_KEY
+
 # Chạy lệnh build của Vite để tạo ra thư mục dist/
 RUN npm run build
 
