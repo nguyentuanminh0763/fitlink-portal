@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
+  "packageManager": "npm@10.8.2",
   "engines": {
     "node": "20.x"
   },
