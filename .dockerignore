@@ -7,3 +7,6 @@ yarn-error.log*
 .gitignore
 .DS_Store
 *.md
+.env
+.env.*
+!.env.example
