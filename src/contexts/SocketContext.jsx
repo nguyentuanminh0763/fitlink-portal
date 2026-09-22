@@ -20,13 +20,20 @@ export const SocketProvider = ({ children }) => {
     };
   }, []);
 
-  // đăng ký user room sau khi connect / khi user thay đổi
+  // Mở/đóng socket theo vòng đời user, rồi đăng ký user room sau khi connect.
+  // Cần thiết vì socket dùng autoConnect: false và server từ chối handshake
+  // không có JWT cookie — lỗi middleware không kích hoạt reconnect tự động.
   useEffect(() => {
-    if (!user?._id) return;
+    if (!user?._id) {
+      socket.disconnect();
+      return;
+    }
 
     const register = () => socket.emit("registerUser", user._id);
-    if (socket.connected) register();
     socket.on("connect", register);
+    if (socket.connected) register();
+    else socket.connect();
+
     return () => socket.off("connect", register);
   }, [user?._id]);
 
