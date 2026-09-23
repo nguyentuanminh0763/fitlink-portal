@@ -1,3 +1,8 @@
+# File này LÀ config nginx thật, không phải file mẫu để copy.
+# Dockerfile copy nó vào /etc/nginx/templates/; lúc container khởi động, entrypoint của
+# image nginx chạy envsubst thay ${BACKEND_URL} rồi ghi ra /etc/nginx/conf.d/default.conf.
+# BACKEND_URL bắt buộc: local lấy từ docker-compose.yml, production lấy từ env của
+# Container App fitlink-portal. Thiếu biến → nginx chết với "unknown backend_url variable".
 server {
     listen 80;
     server_name localhost;
