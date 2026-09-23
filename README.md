@@ -1,6 +1,8 @@
 # Fit-Link Platform — Frontend Client
 
 > Modern Single Page Application (SPA) for the Fit-Link personal trainer marketplace, connecting students with certified coaches.
+>
+> Backend: [fitlink-api](https://github.com/nguyentuanminh0763/fitlink-api)
 
 ---
 
@@ -20,7 +22,7 @@
 ## 📁 Key Directories
 
 ```
-frontend/src/
+src/
 ├── api/            # Centralized Axios client & Socket.IO client
 ├── auth/           # Token & authentication helpers
 ├── components/     # Shared & module UI components (chat, pt, student, ...)
@@ -35,39 +37,70 @@ frontend/src/
 
 ## 🚀 Getting Started
 
-### 1. Installation
+### 1. Prerequisites
+- **Node.js 20** and npm 10
+- The backend running on `http://localhost:3000` — follow the Quick start in [fitlink-api](https://github.com/nguyentuanminh0763/fitlink-api#-getting-started) (it also seeds the demo accounts)
+
+### 2. Quick start
 ```bash
-cd frontend
-npm install
+git clone https://github.com/nguyentuanminh0763/fitlink-portal.git
+cd fitlink-portal
+
+cp .env.example .env.local   # public keys only, works as-is
+npm ci                       # installs the exact versions from package-lock.json
+npm run dev                  # http://localhost:5173
 ```
 
-### 2. Environment Configuration
-Create a `.env` file in the `frontend/` root:
-```env
-VITE_API_BASE_URL=http://localhost:8017/api
-VITE_GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
-```
+> PowerShell: use `Copy-Item .env.example .env.local` instead of `cp`.
 
-### 3. Development Server
+Log in with a demo account, e.g. `student.kiet@fitlink.vn` / `123456`.
+
+### 3. How requests reach the backend
+The app calls `/api` and `/socket.io` with **relative** URLs, so the browser only ever talks to one origin — no CORS preflight, and the `httpOnly` auth cookie just works.
+
+| Environment | Who forwards `/api` and `/socket.io` | Target |
+|---|---|---|
+| `npm run dev` / `npm run preview` | Vite proxy (`vite.config.js`) | `VITE_BACKEND_TARGET`, default `http://localhost:3000` |
+| Docker / production | nginx (`nginx.conf.template`) | `BACKEND_URL` container env var |
+
+Do **not** set `VITE_API_BASE_URL` or `VITE_SOCKET_URL`: absolute URLs bypass the proxy, so the socket and cookies end up on a different origin.
+
+### 4. Environment variables
+All are public, browser-visible keys (see [`.env.example`](.env.example)). `VITE_*` values are baked into the bundle at build time — changing them requires a rebuild.
+
+| Variable | Used for |
+|---|---|
+| `VITE_GG_CLIENT_ID` | Google login (must match `GG_CLIENT_ID` in fitlink-api) |
+| `VITE_MAPTILER_KEY` | Map tiles |
+| `VITE_GEOAPIFY_KEY` | Address search (PT location picker, booking location step) |
+| `VITE_BACKEND_TARGET` | Optional. Backend URL for the Vite dev proxy |
+
+### 5. Production build
 ```bash
-npm run dev
-# Running at http://localhost:5173
+npm run build     # output in dist/
+npm run preview   # serves dist/ on http://localhost:4173, same proxy as dev
 ```
 
-### 4. Production Build
+### 6. Docker
 ```bash
-npm run build
-npm run preview
+docker build -t fitlink-portal .
+docker run -p 8080:80 -e BACKEND_URL=http://host.docker.internal:3000 fitlink-portal
+# http://localhost:8080
 ```
 
-### 5. Docker Deployment
-```bash
-# Build production Nginx container
-docker build -t fitlink-frontend .
+To reach a backend started with `npm run dev`, set `APP_HOST=0.0.0.0` in fitlink-api's `.env` first. The default `localhost` makes Node listen on IPv6 `::1` only, and requests from the container fail with `502` (`connect() failed (111: Connection refused)` in the container log).
 
-# Or run via Docker Compose in the root workspace
-docker compose up -d fitlink-frontend
-```
+`nginx.conf.template` **is** the live nginx config: on container start the nginx entrypoint substitutes `${BACKEND_URL}` and writes `/etc/nginx/conf.d/default.conf`. `BACKEND_URL` is required.
+
+### 7. Troubleshooting
+
+| Symptom | Cause → fix |
+|---|---|
+| API calls return `500`, Vite terminal shows `[vite] http proxy error` / `ECONNREFUSED` | Backend is not running on `VITE_BACKEND_TARGET` (default port 3000) |
+| Docker container returns `502` for `/api` | Backend listens on `localhost` only → set `APP_HOST=0.0.0.0` in fitlink-api's `.env` |
+| Login works but chat and notifications never update | Socket is not reaching the backend — remove any `VITE_SOCKET_URL` / `VITE_API_URL` from `.env.local` |
+| Container keeps restarting, log says `unknown "backend_url" variable` | `BACKEND_URL` was not passed to `docker run` |
+| Changed a `VITE_*` value, the Docker image still uses the old one | Values are baked in at build time → rebuild the image |
 
 ---
 
