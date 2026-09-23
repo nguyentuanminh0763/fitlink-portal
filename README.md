@@ -65,15 +65,23 @@ The app calls `/api` and `/socket.io` with **relative** URLs, so the browser onl
 
 Do **not** set `VITE_API_BASE_URL` or `VITE_SOCKET_URL`: absolute URLs bypass the proxy, so the socket and cookies end up on a different origin.
 
-### 4. Environment variables
-All are public, browser-visible keys (see [`.env.example`](.env.example)). `VITE_*` values are baked into the bundle at build time — changing them requires a rebuild.
+### 4. Configuration
+There are two kinds of variables, set at different times:
 
-| Variable | Used for |
-|---|---|
-| `VITE_GG_CLIENT_ID` | Google login (must match `GG_CLIENT_ID` in fitlink-api) |
-| `VITE_MAPTILER_KEY` | Map tiles |
-| `VITE_GEOAPIFY_KEY` | Address search (PT location picker, booking location step) |
-| `VITE_BACKEND_TARGET` | Optional. Backend URL for the Vite dev proxy |
+| Kind | When it is read | Local (`npm run dev`) | Docker image / production |
+|---|---|---|---|
+| `VITE_*` | **Build time** — baked into the JS bundle, visible to anyone | `.env.local`, copied from [`.env.example`](.env.example) | `ARG` defaults in the [`Dockerfile`](Dockerfile), override with `docker build --build-arg`. The image never sees `.env*` (`.dockerignore`) |
+| `BACKEND_URL` | **Container start** — nginx substitutes it into `nginx.conf.template` | not used (Vite proxy instead) | Container environment variable (`docker run -e`, or the hosting platform) |
+
+Because `VITE_*` values are public, never put a secret in them.
+
+| Variable | Needed | Used for |
+|---|---|---|
+| `VITE_GG_CLIENT_ID` | ✅ | Google login — must equal `GG_CLIENT_ID` in fitlink-api |
+| `VITE_MAPTILER_KEY` | ✅ | Map tiles |
+| `VITE_GEOAPIFY_KEY` | ✅ | Address search (PT location picker, booking location step) |
+| `VITE_BACKEND_TARGET` | | Dev only. Where the Vite proxy sends `/api` and `/socket.io`, default `http://localhost:3000` |
+| `BACKEND_URL` | ✅ in Docker | Where nginx sends `/api` and `/socket.io`. Missing → nginx exits with `unknown "backend_url" variable` |
 
 ### 5. Production build
 ```bash
