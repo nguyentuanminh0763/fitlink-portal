@@ -9,7 +9,8 @@ const LoginPage = lazy(() => import("../pages/LoginPage"));
 const RegisterPage = lazy(() => import("~/pages/RegisterPage"));
 const ForgotPasswordPage = lazy(() => import("~/pages/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("~/pages/ResetPasswordPage"));
-const UnauthorizedPage = lazy(() => import("~/pages/UnauthorizedPage"));
+const UnauthorizedPage = lazy(() => import("~/errors/UnauthorizedPage"));
+const NotFoundPage = lazy(() => import("~/errors/NotFoundPage"));
 const VerifyEmail = lazy(() => import("~/pages/VerifyEmail"));
 const HomePage = lazy(() => import("~/pages/student/HomePage"));
 const AboutPage = lazy(() => import("~/pages/student/AboutPage"));
@@ -333,7 +334,7 @@ export default function AppRouter() {
 
       {/* Default & Catch-all Fallback */}
       <Route path="/" element={<Navigate to="/home" replace />} />
-      <Route path="*" element={<Navigate to="/home" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
     </Suspense>
   );
