@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { getApiErrorMessage } from '~/errors/errorMessages';
 
 const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
@@ -9,13 +10,14 @@ const axiosClient = axios.create({
 // Các URL kiểm tra ngầm không cần hiện toast lỗi khi chưa đăng nhập
 const SILENT_URLS = ['/auth/me', '/auth/profile', '/auth/user-profile', '/users/me'];
 
+// Interceptor quyết định LÀM GÌ khi API lỗi (toast, chuyển trang 401/403);
+// câu thông báo NÓI GÌ lấy từ ~/errors/errorMessages.
 axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error?.response?.status;
     const url = error?.config?.url || '';
-    const message =
-      error?.response?.data?.message || 'Lỗi hệ thống. Vui lòng thử lại.';
+    const message = getApiErrorMessage(error);
 
     const isSilent = SILENT_URLS.some((u) => url.includes(u));
     if (!isSilent) {
@@ -34,8 +36,14 @@ axiosClient.interceptors.response.use(
         currentPath.startsWith('/trainer/');
 
       if (!isExempt) {
-        sessionStorage.setItem('redirectAfterLogin', currentPath + window.location.search);
-        window.location.replace('/login');
+        if (status === 401) {
+          // 401 = chưa đăng nhập / token hết hạn → đăng nhập lại rồi quay về đúng trang này
+          sessionStorage.setItem('redirectAfterLogin', currentPath + window.location.search);
+          window.location.replace('/login');
+        } else {
+          // 403 = đã đăng nhập nhưng không đủ quyền → đăng nhập lại cũng không giải quyết được
+          window.location.replace('/unauthorized');
+        }
       }
     }
 
