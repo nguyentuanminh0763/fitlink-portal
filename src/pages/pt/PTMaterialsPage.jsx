@@ -566,6 +566,8 @@ export default function PTMaterialsPage() {
                 <div className="mt-2 flex items-center gap-2">
                   <input
                     type="file"
+                    // Khớp danh sách server cho phép (backend src/middlewares/upload.js) — server vẫn kiểm tra lại
+                    accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
                     onChange={(e) => setFile(e.target.files?.[0] || null)}
                     className="text-xs text-slate-300"
                   />
@@ -578,7 +580,8 @@ export default function PTMaterialsPage() {
 
                 <p className="mt-1 text-[11px] text-slate-400">
                   Nếu chọn file từ máy, hệ thống sẽ upload rồi tự điền URL tự
-                  động.
+                  động. Chấp nhận PDF, ảnh, Word, Excel, PowerPoint (tối đa
+                  20MB). Video hãy dán link YouTube/Drive.
                 </p>
               </div>
 
