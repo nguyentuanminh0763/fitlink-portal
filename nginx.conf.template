@@ -11,6 +11,11 @@ server {
     root /usr/share/nginx/html;
     index index.html index.htm;
 
+    # Mặc định nginx chỉ nhận body tối đa 1MB: file lớn hơn bị trả 413 (trang HTML) trước khi tới Express.
+    # 21m = trần tài liệu PT 20MB (backend src/middlewares/upload.js) + phần dư của multipart;
+    # giới hạn thật theo từng loại file vẫn do Express kiểm tra (vượt → 413 JSON có câu tiếng Việt).
+    client_max_body_size 21m;
+
     # ==========================================
     # 1. BẬT NÉN GZIP (Tối ưu tốc độ tải trang)
     # ==========================================
