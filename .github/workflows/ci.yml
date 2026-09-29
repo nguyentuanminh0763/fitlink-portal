@@ -1,0 +1,65 @@
+# CI của fitlink-portal: build Docker image → đẩy lên ACR.
+# Deploy vẫn làm tay: Azure Portal → Container App → Create revision → chọn tag = mã commit.
+# Cần trong Settings → Secrets and variables → Actions:
+#   Variables: ACR_LOGIN_SERVER, ACR_USERNAME   ·   Secret: ACR_PASSWORD
+name: FitLink Portal CI
+
+on:
+  push:
+    branches: [main, dev]
+    paths-ignore: ['**.md'] # chỉ sửa tài liệu thì không chạy
+  pull_request:
+    branches: [main, dev]
+    paths-ignore: ['**.md']
+
+# Push liên tiếp lên cùng một nhánh → huỷ lần chạy cũ, chỉ chạy bản mới nhất
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Build & push image
+    runs-on: ubuntu-latest
+
+    # Không cài Node / npm ci / vite build riêng: Dockerfile đã chạy npm ci + npm run build
+    # ở stage builder, build hỏng thì bước Docker đỏ.
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      # Tag = 7 ký tự đầu mã commit → nhìn tag biết image build từ code nào.
+      # latest chỉ gắn cho main, để không bao giờ deploy nhầm bản dev.
+      # PR: chỉ build kiểm tra với tag nội bộ, không đẩy lên ACR.
+      - name: Compute Image Tags
+        id: tags
+        run: |
+          if [ "${{ github.event_name }}" != "push" ]; then
+            echo "tags=fitlink-portal:ci-test" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          IMAGE="${{ vars.ACR_LOGIN_SERVER }}/fitlink-portal"
+          TAGS="$IMAGE:${GITHUB_SHA::7}"
+          if [ "$GITHUB_REF" = "refs/heads/main" ]; then TAGS="$TAGS,$IMAGE:latest"; fi
+          echo "tags=$TAGS" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Azure Container Registry
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.ACR_LOGIN_SERVER }}
+          username: ${{ vars.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      # cache gha: lưu layer Docker giữa các lần chạy, package.json không đổi thì bỏ qua npm ci
+      - name: Build (and Push) Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ github.event_name == 'push' }}
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
