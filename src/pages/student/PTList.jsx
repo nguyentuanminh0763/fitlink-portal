@@ -1,3 +1,4 @@
+import Avatar from '~/components/Avatar'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePublicPTListQuery } from '~/hooks/usePTQueries'
@@ -101,8 +102,8 @@ const PTList = () => {
                   >
                     {/* Ảnh đại diện */}
                     <div className="relative w-full h-56 bg-slate-200 dark:bg-slate-800">
-                      <img
-                        src={pt.user?.avatar || '/default-avatar.png'}
+                      <Avatar
+                        src={pt.user?.avatar}
                         alt={pt.user?.name}
                         className="w-full h-full object-cover"
                         loading="lazy"

@@ -427,6 +427,7 @@
 // }
 
 // export default PTRequestDetail
+import Avatar from '~/components/Avatar'
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import toast, { Toaster } from 'react-hot-toast'
@@ -544,8 +545,8 @@ export default function PTRequestDetail() {
             <User size={18} /> Thông tin PT
           </h2>
           <div className="flex items-center mb-4">
-            <img
-              src={user?.avatar || 'https://via.placeholder.com/80x80?text=PT'}
+            <Avatar
+              src={user?.avatar}
               alt={user?.name}
               className="w-20 h-20 rounded-full border border-slate-600 object-cover shadow-sm mr-4"
             />

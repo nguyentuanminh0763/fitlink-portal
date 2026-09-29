@@ -1,3 +1,4 @@
+import Avatar from "~/components/Avatar";
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "~/api/axiosClient";
 import { studentService } from "~/services/studentService";
@@ -116,8 +117,8 @@ export default function StudentList() {
                   className="border-b border-slate-700 hover:bg-slate-700/40"
                 >
                   <td className="px-6 py-3 flex items-center space-x-3">
-                    <img
-                      src={s.avatar || "/default-avatar.png"}
+                    <Avatar
+                      src={s.avatar}
                       alt={s.name}
                       className="w-10 h-10 rounded-full object-cover"
                     />
@@ -206,8 +207,8 @@ export default function StudentList() {
             {/* Body */}
             <div className="p-6 text-gray-200 space-y-5">
               <div className="flex items-center space-x-4 mb-4">
-                <img
-                  src={selectedStudent.avatar || "/default-avatar.png"}
+                <Avatar
+                  src={selectedStudent.avatar}
                   alt={selectedStudent.name}
                   className="w-20 h-20 rounded-full border border-gray-500 object-cover"
                 />

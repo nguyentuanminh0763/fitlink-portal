@@ -1,4 +1,5 @@
 // src/pages/student/PTDetail.jsx
+import Avatar from "~/components/Avatar";
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -288,7 +289,7 @@ export default function PTDetail() {
                     <div className="flex flex-col sm:flex-row items-center sm:items-end gap-5 text-center sm:text-left">
                       {/* Avatar */}
                       <div className="relative shrink-0">
-                        <img
+                        <Avatar
                           src={
                             user?.avatar ||
                             `https://ui-avatars.com/api/?name=${encodeURIComponent(
@@ -1085,7 +1086,7 @@ export default function PTDetail() {
         {!loading && ptDetail && (
           <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-4 py-2.5 shadow-2xl flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 overflow-hidden">
-              <img
+              <Avatar
                 src={
                   user?.avatar ||
                   `https://ui-avatars.com/api/?name=${encodeURIComponent(

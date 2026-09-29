@@ -1,3 +1,4 @@
+import Avatar from "~/components/Avatar";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "~/api/axiosClient";
@@ -83,7 +84,7 @@ const UserDetail = () => {
 
           <div className="flex flex-col items-center mb-8">
             {user.avatar ? (
-              <img
+              <Avatar
                 src={user.avatar}
                 alt="avatar"
                 className="w-28 h-28 rounded-full object-cover mb-3 border-2 border-orange-500"

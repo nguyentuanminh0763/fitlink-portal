@@ -1,4 +1,5 @@
 // src/pages/pt/PTProfile.jsx
+import Avatar from '~/components/Avatar'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
 import PTMainLayout from '~/layouts/pt/PTMainLayout'
@@ -310,8 +311,8 @@ export default function PTProfile() {
           {/* Avatar */}
           <div className="flex flex-col items-center gap-3">
             <div className="h-28 w-28 overflow-hidden rounded-full border border-white/10 bg-white/10">
-              <img
-                src={avatarPreview || user.avatar || 'https://placehold.co/200x200?text=Avatar'}
+              <Avatar
+                src={avatarPreview || user.avatar}
                 alt="avatar"
                 className="h-full w-full object-cover"
               />

@@ -1,3 +1,4 @@
+import Avatar from '~/components/Avatar';
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -172,7 +173,7 @@ export default function UserProfile() {
                   {avatarPreview ? (
                     <img src={avatarPreview} alt="Avatar Preview" className="w-full h-full object-cover" />
                   ) : user?.avatar ? (
-                    <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                    <Avatar src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
                     <span className="text-3xl text-orange-600 dark:text-orange-400 font-black">
                       {user?.name?.charAt(0)?.toUpperCase() || 'U'}
@@ -379,7 +380,7 @@ export default function UserProfile() {
                         {avatarPreview ? (
                           <img src={avatarPreview} alt="Avatar preview" className="w-full h-full object-cover" />
                         ) : user?.avatar ? (
-                          <img src={user.avatar} alt="Current avatar" className="w-full h-full object-cover" />
+                          <Avatar src={user.avatar} alt="Current avatar" className="w-full h-full object-cover" />
                         ) : (
                           <span className="text-xs text-slate-400">Chưa có ảnh</span>
                         )}

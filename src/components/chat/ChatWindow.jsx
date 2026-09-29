@@ -1,4 +1,5 @@
 // src/components/chat/ChatWindow.jsx
+import Avatar from "~/components/Avatar";
 import React, { useEffect, useState, useRef } from "react";
 import { SendHorizonal, MessageSquare } from "lucide-react";
 import { useSocket } from "~/contexts/SocketContext";
@@ -93,8 +94,8 @@ const ChatWindow = ({ self, peer, role }) => {
     <div className="flex flex-col bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 w-full h-full overflow-hidden transition-colors">
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/80 flex-shrink-0 transition-colors">
-        <img
-          src={peer.avatar || "/default-avatar.png"}
+        <Avatar
+          src={peer.avatar}
           alt="avatar"
           className="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-slate-700 shadow-xs"
         />

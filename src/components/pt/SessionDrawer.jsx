@@ -1,4 +1,5 @@
 // src/components/pt/SessionDrawer.jsx
+import Avatar from "~/components/Avatar";
 import { useEffect, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -18,8 +19,7 @@ export default function SessionDrawer({ open, onClose, eventData, onChanged }) {
 
   const title = session?.title || "Buổi tập";
   const studentName = session?.student?.name || "Student";
-  const studentAvatar =
-    session?.student?.avatar || "https://placehold.co/100x100?text=Avatar";
+  const studentAvatar = session?.student?.avatar;
   const pkgName = eventData?.sessionPackageName || "";
 
   const startStr = session?.startTime
@@ -115,7 +115,7 @@ export default function SessionDrawer({ open, onClose, eventData, onChanged }) {
         <div className="h-[calc(100vh-56px)] overflow-y-auto p-4 space-y-4">
           {/* Student box */}
           <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3">
-            <img
+            <Avatar
               src={studentAvatar}
               className="h-12 w-12 rounded-full object-cover"
             />

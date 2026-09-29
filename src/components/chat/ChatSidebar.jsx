@@ -1,3 +1,4 @@
+import Avatar from "~/components/Avatar";
 import React from "react";
 import { MessageSquare } from "lucide-react";
 
@@ -38,8 +39,8 @@ const ChatSidebar = ({ list, activeId, onSelect, role }) => {
                     : "hover:bg-blue-950/30"
                 }`}
               >
-                <img
-                  src={item.avatar || "/default-avatar.png"}
+                <Avatar
+                  src={item.avatar}
                   alt={item.name}
                   className="w-10 h-10 rounded-full object-cover border border-gray-600"
                 />

@@ -1,3 +1,4 @@
+import Avatar from "~/components/Avatar";
 import { Link } from "react-router-dom";
 import { FaUsers, FaCalendarAlt, FaWallet, FaChartPie } from "react-icons/fa";
 import PTMainLayout from "~/layouts/pt/PTMainLayout";
@@ -203,7 +204,7 @@ function StudentsMini({ students = [] }) {
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 overflow-hidden rounded-full bg-white/10">
                 {s.avatar && (
-                  <img
+                  <Avatar
                     src={s.avatar}
                     alt={s.name}
                     className="h-full w-full object-cover"

@@ -1,4 +1,5 @@
 // src/components/Navbar.jsx
+import Avatar from '~/components/Avatar';
 import React, { useEffect, useState, useRef, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -161,7 +162,7 @@ export default function Navbar() {
                 className="flex items-center gap-2.5 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition border border-slate-200/80 dark:border-slate-700 group"
               >
                 {user.avatar ? (
-                  <img
+                  <Avatar
                     src={user.avatar}
                     alt={user.name || 'User'}
                     className="w-8 h-8 rounded-full object-cover ring-2 ring-orange-400/40"

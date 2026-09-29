@@ -1,4 +1,5 @@
 // src/pages/SearchPTs.jsx
+import Avatar from "~/components/Avatar";
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -499,7 +500,7 @@ export default function SearchPTs() {
                               className="absolute -bottom-5 left-3.5 z-20 cursor-pointer"
                               onClick={() => navigate(`/pt/${ptSlug}`)}
                             >
-                              <img
+                              <Avatar
                                 src={avatarPhoto}
                                 alt={pt.userInfo?.name}
                                 className="w-12 h-12 rounded-xl object-cover ring-2 ring-white dark:ring-slate-900 shadow-md bg-slate-200 dark:bg-slate-700 hover:scale-105 transition"
@@ -605,7 +606,7 @@ export default function SearchPTs() {
                       >
                         {/* Left: Avatar & Info */}
                         <div className="flex items-center gap-3.5">
-                          <img
+                          <Avatar
                             src={avatarPhoto}
                             alt={pt.userInfo?.name}
                             className="w-14 h-14 rounded-2xl object-cover ring-2 ring-slate-100 dark:ring-slate-800 shrink-0"

@@ -1,3 +1,4 @@
+import Avatar from "~/components/Avatar";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import axiosClient from "~/api/axiosClient";
 
@@ -88,7 +89,7 @@ function PTDetailModal({ open, onClose, row }) {
             {/* Basic info */}
             <div className="flex gap-4">
               {row.avatar ? (
-                <img
+                <Avatar
                   src={row.avatar}
                   alt={row.name}
                   className="w-16 h-16 rounded-full object-cover border border-slate-600"
@@ -496,7 +497,7 @@ export default function PTList() {
                   <td className="px-6 py-3">
                     <div className="flex items-center gap-3">
                       {row.avatar ? (
-                        <img
+                        <Avatar
                           src={row.avatar}
                           alt={row.name}
                           className="w-10 h-10 rounded-full object-cover border border-slate-700"
