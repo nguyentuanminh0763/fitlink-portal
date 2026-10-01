@@ -10,10 +10,6 @@ import { toast } from 'react-toastify';
 const schema = yup.object().shape({
   name: yup.string().required('Name is required').min(2, 'Name must be at least 2 characters'),
   email: yup.string().email('Invalid email').required('Email is required'),
-  phone: yup
-    .string()
-    .required('Phone is required')
-    .matches(/^0\d{9}$/, 'Phone format is invalid'),
   password: yup.string().required('Password is required').min(6, 'Password must be at least 6 characters'),
   confirmPassword: yup
     .string()
@@ -60,9 +56,9 @@ export default function RegisterPage() {
   }, [resendCooldown]);
 
   // submit Student
-  const onSubmitStudent = async ({ name, phone, password, email }) => {
+  const onSubmitStudent = async ({ name, password, email }) => {
     try {
-      await registerStart({ name, phone, password, email, role: 'student' });
+      await registerStart({ name, password, email, role: 'student' });
       setEmailSent(true);
       setSecondsLeft(180);
       setResendCooldown(60);
@@ -76,8 +72,8 @@ export default function RegisterPage() {
   const handleResend = async () => {
     if (resendCooldown > 0) return;
     try {
-      const { name, phone, password, email } = getValuesStudent();
-      await registerStart({ name, phone, password, email, role: 'student' });
+      const { name, password, email } = getValuesStudent();
+      await registerStart({ name, password, email, role: 'student' });
       setSecondsLeft(180);
       setResendCooldown(60);
       toast.success('Verification email re-sent');
@@ -87,9 +83,9 @@ export default function RegisterPage() {
   };
 
   // submit PT
-  const onSubmitPT = async ({ name, phone, password, email }) => {
+  const onSubmitPT = async ({ name, password, email }) => {
     try {
-      await registerStart({ name, phone, password, email, role: 'pt' });
+      await registerStart({ name, password, email, role: 'pt' });
       toast.success('Registered as PT. Please complete your profile in Dashboard and submit for approval.');
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Registration failed');
@@ -183,7 +179,6 @@ export default function RegisterPage() {
                 <form onSubmit={handleSubmitStudent(onSubmitStudent)} className="space-y-4">
                   <Input label="Full name" name="name" register={registerStudent} errors={errorsStudent} />
                   <Input label="Email" name="email" register={registerStudent} errors={errorsStudent} />
-                  <Input label="Phone number" name="phone" register={registerStudent} errors={errorsStudent} />
                   <Input label="Password" name="password" type="password" register={registerStudent} errors={errorsStudent} />
                   <Input label="Confirm password" name="confirmPassword" type="password" register={registerStudent} errors={errorsStudent} />
                   <button
@@ -244,7 +239,6 @@ export default function RegisterPage() {
               <form onSubmit={handleSubmitPT(onSubmitPT)} className="space-y-4">
                 <Input label="Full name" name="name" register={registerPT} errors={errorsPT} />
                 <Input label="Email" name="email" register={registerPT} errors={errorsPT} />
-                <Input label="Phone number" name="phone" register={registerPT} errors={errorsPT} />
                 <Input label="Password" name="password" type="password" register={registerPT} errors={errorsPT} />
                 <Input label="Confirm password" name="confirmPassword" type="password" register={registerPT} errors={errorsPT} />
 

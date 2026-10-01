@@ -7,10 +7,10 @@ import { sendForgotPasswordRequest } from '~/services/authService';
 import { Link } from 'react-router-dom';
 
 const schema = yup.object().shape({
-  phone: yup
+  email: yup
     .string()
-    .required('Phone number is required')
-    .matches(/^0\d{9}$/, 'Invalid phone number format'),
+    .required('Email is required')
+    .email('Invalid email'),
 });
 
 export default function ForgotPasswordPage() {
@@ -22,9 +22,9 @@ export default function ForgotPasswordPage() {
     resolver: yupResolver(schema)
   });
 
-  const onSubmit = async ({ phone }) => {
+  const onSubmit = async ({ email }) => {
     try {
-      await sendForgotPasswordRequest({ phone });
+      await sendForgotPasswordRequest({ email });
       toast.success('✅ A reset link has been sent to your email!');
     } catch (err) {
       toast.error(err?.response?.data?.message || '❌ Failed to send reset link!');
@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
                 Forgot your <span className="text-[#ff4d00]">Password?</span>
               </h2>
               <p className="text-gray-200 mt-3 max-w-md">
-                Enter your registered phone number — we’ll send a reset link to the associated email.
+                Enter your registered email — we’ll send you a reset link.
               </p>
               <div className="mt-8">
                 <img
@@ -76,24 +76,24 @@ export default function ForgotPasswordPage() {
                 Forgot Password
               </h1>
               <p className="text-gray-400 mt-1">
-                Enter your phone number to receive a password reset link via email
+                Enter your email to receive a password reset link
               </p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Phone Number
+                  Email
                 </label>
                 <input
-                  type="text"
-                  placeholder="0xxxxxxxxx"
-                  {...register('phone')}
+                  type="email"
+                  placeholder="user@fitlink.vn"
+                  {...register('email')}
                   className="w-full rounded-lg border border-[#333] bg-[#0e0e0e] text-white placeholder-gray-500 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-[#ff4d00] focus:border-transparent"
                 />
-                {errors.phone && (
+                {errors.email && (
                   <p className="text-red-500 text-sm mt-1">
-                    {errors.phone.message}
+                    {errors.email.message}
                   </p>
                 )}
               </div>

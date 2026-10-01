@@ -48,8 +48,8 @@ export const logout = async () => {
     }
 }
 
-export const sendForgotPasswordRequest = async ({ phone }) => {
-  return await axios.post('/auth/forgot-password', { phone });
+export const sendForgotPasswordRequest = async ({ email }) => {
+  return await axios.post('/auth/forgot-password', { email });
 };
 
 export const resetPassword = async (token, newPassword, confirmPassword) => {

@@ -10,15 +10,11 @@ import { toast } from "react-toastify";
 import { GoogleLogin } from "@react-oauth/google";
 
 const schema = yup.object().shape({
+  // Tên field vẫn là `phone` vì API /auth/login đọc req.body.phone, nhưng giờ chỉ nhận email
   phone: yup
     .string()
-    .required("Vui lòng nhập số điện thoại hoặc email")
-    .test("phone-or-email", "Email hoặc số điện thoại không hợp lệ", (value) => {
-      if (!value) return false;
-      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-      const isPhone = /^0\d{9}$/.test(value);
-      return isEmail || isPhone;
-    }),
+    .required("Vui lòng nhập email")
+    .email("Email không hợp lệ"),
   password: yup
     .string()
     .required("Mật khẩu là bắt buộc")
@@ -147,11 +143,11 @@ export default function LoginPage() {
             >
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-300">
-                  Phone number or Email
+                  Email
                 </label>
                 <input
-                  type="text"
-                  placeholder="0xxxxxxxxx or user@fitlink.vn"
+                  type="email"
+                  placeholder="user@fitlink.vn"
                   {...register("phone")}
                   className="w-full rounded-lg border border-[#333] bg-[#0e0e0e] px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-[#ff4d00] outline-none"
                 />
