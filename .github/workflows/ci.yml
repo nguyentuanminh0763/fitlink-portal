@@ -19,14 +19,27 @@ concurrency:
 
 jobs:
   ci:
-    name: Build & push image
+    name: Lint, build & push image
     runs-on: ubuntu-latest
 
-    # Không cài Node / npm ci / vite build riêng: Dockerfile đã chạy npm ci + npm run build
-    # ở stage builder, build hỏng thì bước Docker đỏ.
+    # vite build không chạy riêng: Dockerfile đã chạy npm ci + npm run build ở stage builder,
+    # build hỏng thì bước Docker đỏ. Lint thì Dockerfile không chạy → làm ở đây, trước Docker.
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20 # khớp node:20-alpine trong Dockerfile
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Lint sạch 0 lỗi 0 cảnh báo; có lỗi → job đỏ, không build image
+      - name: Lint
+        run: npm run lint -- --max-warnings 0
 
       # Tag = 7 ký tự đầu mã commit → nhìn tag biết image build từ code nào.
       # latest chỉ gắn cho main, để không bao giờ deploy nhầm bản dev.
