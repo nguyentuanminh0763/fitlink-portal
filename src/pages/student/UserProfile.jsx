@@ -25,12 +25,8 @@ const profileSchema = yup.object().shape({
     .oneOf(['male', 'female', 'other'], 'Giới tính không hợp lệ'),
   address: yup
     .string(),
-  dob: yup
-    .date()
-    .nullable()
-    .transform((value, originalValue) => {
-      return originalValue === '' ? null : value;
-    })
+  // Giữ chuỗi "YYYY-MM-DD" của ô date. yup.date() đổi sang 0h giờ máy (GMT+7) → lưu thành 17h hôm trước (UTC) → hiển thị lùi 1 ngày
+  dob: yup.string()
 });
 
 const passwordSchema = yup.object().shape({
