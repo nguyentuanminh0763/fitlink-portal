@@ -244,8 +244,8 @@ export default function PTProfile() {
       await ptApprovalService.submitReview()
       toast.success('Submitted for review')
       await loadLatestRequest()
-    } catch (e) {
-      toast.error(e?.response?.data?.message || 'Submit failed')
+    } catch {
+      // axiosClient interceptor đã hiện toast lỗi, không toast lại ở đây
     } finally {
       setReviewLoading(false)
     }
@@ -257,8 +257,8 @@ export default function PTProfile() {
       await ptApprovalService.cancelMyPending()
       toast.success('Pending request cancelled')
       await loadLatestRequest()
-    } catch (e) {
-      toast.error(e?.response?.data?.message || 'Cancel failed')
+    } catch {
+      // axiosClient interceptor đã hiện toast lỗi, không toast lại ở đây
     } finally {
       setReviewLoading(false)
     }

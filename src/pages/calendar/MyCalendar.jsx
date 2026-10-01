@@ -80,8 +80,8 @@ export default function MyCalendar() {
       const newEv = mapSessionToEvent(res.data)
       setEvents((prev) => [...prev, newEv])
       toast.success('Đã tạo buổi tập')
-    } catch (e) {
-      toast.error(e?.response?.data?.message || 'Tạo buổi tập thất bại')
+    } catch {
+      // axiosClient interceptor đã hiện toast lỗi, không toast lại ở đây
     }
   }
 

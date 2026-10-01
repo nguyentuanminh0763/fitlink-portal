@@ -26,8 +26,8 @@ export default function ForgotPasswordPage() {
     try {
       await sendForgotPasswordRequest({ email });
       toast.success('✅ A reset link has been sent to your email!');
-    } catch (err) {
-      toast.error(err?.response?.data?.message || '❌ Failed to send reset link!');
+    } catch {
+      // axiosClient interceptor đã hiện toast lỗi, không toast lại ở đây
     }
   };
 

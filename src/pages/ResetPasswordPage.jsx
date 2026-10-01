@@ -36,8 +36,8 @@ export default function ResetPasswordPage() {
       await resetPassword(token, password, confirmPassword);
       toast.success("✅ Đặt lại mật khẩu thành công!");
       navigate("/login");
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "❌ Đặt lại mật khẩu thất bại");
+    } catch {
+      // axiosClient interceptor đã hiện toast lỗi, không toast lại ở đây
     }
   };
 

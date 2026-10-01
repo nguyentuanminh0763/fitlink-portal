@@ -61,7 +61,9 @@ export default function LoginPage() {
           break;
       }
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Đăng nhập thất bại");
+      // getProfile (/auth/me) là URL im lặng của interceptor nên vẫn toast ở đây; toastId trùng câu → không hiện 2 lần
+      const message = err?.response?.data?.message || "Đăng nhập thất bại";
+      toast.error(message, { toastId: message });
     }
   };
 
@@ -84,8 +86,8 @@ export default function LoginPage() {
         default:
           break;
       }
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "Đăng nhập Google thất bại");
+    } catch {
+      // axiosClient interceptor đã hiện toast lỗi, không toast lại ở đây
     }
   };
 

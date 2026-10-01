@@ -124,8 +124,8 @@ export default function UserProfile() {
       });
       toast.success('Đổi mật khẩu thành công!');
       resetPassword();
-    } catch (error) {
-      toast.error(error?.response?.data?.message || 'Đổi mật khẩu thất bại');
+    } catch {
+      // axiosClient interceptor đã hiện toast lỗi, không toast lại ở đây
     }
   };
 

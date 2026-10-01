@@ -63,8 +63,8 @@ export default function RegisterPage() {
       setSecondsLeft(180);
       setResendCooldown(60);
       toast.success('Verification email sent. Please check your inbox within 3 minutes.');
-    } catch (err) {
-      toast.error(err?.response?.data?.message || 'Registration failed');
+    } catch {
+      // axiosClient interceptor đã hiện toast lỗi, không toast lại ở đây
     }
   };
 
@@ -77,8 +77,8 @@ export default function RegisterPage() {
       setSecondsLeft(180);
       setResendCooldown(60);
       toast.success('Verification email re-sent');
-    } catch (err) {
-      toast.error(err?.response?.data?.message || 'Re-send failed');
+    } catch {
+      // axiosClient interceptor đã hiện toast lỗi, không toast lại ở đây
     }
   };
 
@@ -87,8 +87,8 @@ export default function RegisterPage() {
     try {
       await registerStart({ name, password, email, role: 'pt' });
       toast.success('Registered as PT. Please complete your profile in Dashboard and submit for approval.');
-    } catch (err) {
-      toast.error(err?.response?.data?.message || 'Registration failed');
+    } catch {
+      // axiosClient interceptor đã hiện toast lỗi, không toast lại ở đây
     }
   };
 

@@ -78,8 +78,8 @@ function ScheduleModal({ open, onClose, studentPackage, onCreated }) {
                 toast.success('Đã tạo lịch')
                 onCreated?.(res.data)
                 onClose()
-              } catch (e) {
-                toast.error(e?.response?.data?.message || 'Tạo lịch thất bại')
+              } catch {
+                // axiosClient interceptor đã hiện toast lỗi, không toast lại ở đây
               } finally {
                 setSaving(false)
               }

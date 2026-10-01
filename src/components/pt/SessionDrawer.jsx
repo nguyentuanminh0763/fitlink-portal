@@ -53,8 +53,8 @@ export default function SessionDrawer({ open, onClose, eventData, onChanged }) {
       });
       toast.success("Đã lưu thay đổi");
       onChanged?.();
-    } catch (e) {
-      toast.error(e?.response?.data?.message || "Cập nhật thất bại");
+    } catch {
+      // axiosClient interceptor đã hiện toast lỗi, không toast lại ở đây
     } finally {
       setLoading(false);
     }
@@ -69,8 +69,8 @@ export default function SessionDrawer({ open, onClose, eventData, onChanged }) {
       toast.success("Đã xoá");
       onChanged?.();
       onClose?.();
-    } catch (e) {
-      toast.error(e?.response?.data?.message || "Xoá thất bại");
+    } catch {
+      // axiosClient interceptor đã hiện toast lỗi, không toast lại ở đây
     } finally {
       setLoading(false);
     }
