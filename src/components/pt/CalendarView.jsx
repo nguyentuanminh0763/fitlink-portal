@@ -143,6 +143,9 @@ export default function CalendarView({
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
+    // Gắn lại listener mỗi khi draft đổi (handler đọc draft). Đưa handler vào deps = gắn lại MỖI render;
+    // muốn bỏ dòng này phải bọc các handler kéo-thả bằng useCallback
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draft]);
 
   // tick giờ
@@ -240,6 +243,8 @@ export default function CalendarView({
       window.removeEventListener("mousemove", onWindowMouseMove);
       window.removeEventListener("mouseup", onWindowMouseUp);
     };
+    // Như effect kéo-tạo ở trên: gắn lại khi tempDrag/sessions đổi, không gắn lại mỗi render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tempDrag, sessions]);
 
   const renderSessionBlock = (sess) => {

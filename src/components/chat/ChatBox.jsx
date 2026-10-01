@@ -19,7 +19,7 @@ const ChatBox = ({ chatId, currentUser }) => {
     });
 
     return () => socket.off("receive_message");
-  }, [chatId]);
+  }, [chatId, socket]);
 
   const handleSend = async (text) => {
     const newMsg = { chat: chatId, sender: currentUser._id, text };

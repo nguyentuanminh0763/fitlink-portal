@@ -11,15 +11,11 @@ export async function initiatePayment(transactionDetails) {
     "Đang gọi API Backend để khởi tạo và hoàn tất giao dịch nội bộ..."
   );
 
-  try {
-    const response = await axiosClient.post(
-      "/transactions/initiate",
-      transactionDetails
-    );
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await axiosClient.post(
+    "/transactions/initiate",
+    transactionDetails
+  );
+  return response.data;
 }
 export const transactionService = {
   async getTransactions(status = "paid", page = 1, limit = 10) {

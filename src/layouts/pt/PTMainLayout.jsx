@@ -15,7 +15,7 @@ export default function PTMainLayout({ children }) {
   const toggleCollapsed = () => {
     const next = !collapsed
     setCollapsed(next)
-    try { localStorage.setItem(STORAGE_COLLAPSE, next ? '1' : '0') } catch {}
+    try { localStorage.setItem(STORAGE_COLLAPSE, next ? '1' : '0') } catch { /* localStorage bị chặn (chế độ riêng tư): chỉ mất ghi nhớ trạng thái thu gọn */ }
   }
 
   // ---- verification (rút gọn) ----

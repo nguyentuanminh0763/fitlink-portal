@@ -137,6 +137,8 @@ export default function PTStudents() {
   }
 
   useEffect(() => { loadPackages() }, [])
+  // Về trang 1 khi đổi gói/từ khoá. loadStudents đọc `page` (tham số mặc định): đưa vào deps thì mỗi lần chuyển trang lại bị kéo về trang 1
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadStudents(1) }, [selectedPackageId, q])
 
   return (

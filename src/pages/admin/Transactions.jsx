@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { transactionService } from "../../services/transactionService";
 import {
   FaMoneyBillWave,
@@ -36,7 +36,8 @@ export default function Transactions() {
     totalPages: 1,
   });
 
-  const fetchData = async () => {
+  // useCallback theo bộ lọc + trang: effect bên dưới chạy lại đúng khi 2 giá trị này đổi
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -54,11 +55,11 @@ export default function Transactions() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter, page]);
 
   useEffect(() => {
     fetchData();
-  }, [statusFilter, page]);
+  }, [fetchData]);
 
   return (
     <div className="p-6 text-gray-200 relative before:hidden after:hidden">

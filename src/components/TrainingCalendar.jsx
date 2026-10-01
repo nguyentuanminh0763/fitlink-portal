@@ -39,6 +39,8 @@ const TrainingCalendar = ({ role = 'student' }) => {
     if (user?._id) {
       loadPackages();
     }
+    // Chỉ tải lại khi đổi user. loadPackages đọc selectedPackage → thêm vào deps sẽ tải lại gói mỗi lần chọn gói
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadPackages = async () => {
@@ -66,6 +68,8 @@ const TrainingCalendar = ({ role = 'student' }) => {
       setEvents([]);
       loadSessions(selectedPackage._id);
     }
+    // loadSessions khai báo bên dưới và tạo mới mỗi render; effect chỉ cần chạy khi đổi gói
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPackage]);
 
   // REALTIME SESSION UPDATE
@@ -79,6 +83,8 @@ const TrainingCalendar = ({ role = 'student' }) => {
 
     socket.on('session_updated', handler);
     return () => socket.off('session_updated', handler);
+    // Đăng ký lại listener khi đổi gói; loadSessions tạo mới mỗi render nên không đưa vào deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPackage]);
 
   const loadSessions = async (packageId) => {

@@ -11,16 +11,9 @@ import axiosClient from '../api/axiosClient' // Import client đã được cấ
  * @returns {Promise<Array>} Danh sách các StudentPackage.
  */
 export async function getStudentPackages(studentId) {
-  try {
-    // Đường dẫn tương đối: /student-packages/student/:studentId
-    const response = await axiosClient.get(
-      `/student-packages/student/${studentId}`
-    )
-    return response.data
-  } catch (error) {
-    // Interceptor đã hiển thị toast
-    throw error
-  }
+  // Lỗi để nguyên cho nơi gọi; interceptor đã hiển thị toast
+  const response = await axiosClient.get(`/student-packages/student/${studentId}`)
+  return response.data
 }
 
 /**
@@ -30,12 +23,7 @@ export async function getStudentPackages(studentId) {
  * @returns {Promise<object>} Chi tiết StudentPackage.
  */
 export async function getPackageDetails(packageId) {
-  try {
-    // Đường dẫn tương đối: /student-packages/:id
-    const response = await axiosClient.get(`/student-packages/${packageId}`)
-    return response.data
-  } catch (error) {
-    // Interceptor đã hiển thị toast
-    throw error
-  }
+  // Lỗi để nguyên cho nơi gọi; interceptor đã hiển thị toast
+  const response = await axiosClient.get(`/student-packages/${packageId}`)
+  return response.data
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import PTMainLayout from "~/layouts/pt/PTMainLayout";
 import { getMyPackages } from "~/services/packageService";
 import { previewSchedule, generateSchedule } from "~/services/scheduleService";
@@ -132,7 +132,7 @@ export default function PTSchedule() {
     }
   };
 
-  const reloadPreview = async () => {
+  const reloadPreview = useCallback(async () => {
     if (!pkgId) return;
     setLoading(true);
     setErr("");
@@ -151,7 +151,7 @@ export default function PTSchedule() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pkgId, baseStartDate]);
 
   const doGenerate = async () => {
     if (!pkgId) return;
@@ -174,7 +174,7 @@ export default function PTSchedule() {
 
   useEffect(() => {
     if (pkgId && !useRealData) reloadPreview();
-  }, [pkgId, baseStartDate, useRealData]);
+  }, [pkgId, useRealData, reloadPreview]);
 
   useEffect(() => {
     if (useRealData) loadRealSessions();

@@ -81,7 +81,7 @@ export default function PTProfile() {
     try {
       const data = await ptApprovalService.getMyLatestRequest()
       setLatestRequest(data || null)
-    } catch { }
+    } catch { /* interceptor đã toast lỗi; giữ yêu cầu duyệt đang hiển thị */ }
   }
 
   useEffect(() => {

@@ -78,7 +78,7 @@ export default function PTDetail() {
   } = usePTDetailQuery(id);
 
   const user = ptDetail?.user || {};
-  const gym = ptDetail?.primaryGym || {};
+  const gym = useMemo(() => ptDetail?.primaryGym || {}, [ptDetail?.primaryGym]);
   const ptUserId = user?._id || id;
 
   // TanStack Query: Cache danh sách gói tập công khai theo PT User ID

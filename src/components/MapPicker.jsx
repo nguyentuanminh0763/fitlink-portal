@@ -61,12 +61,13 @@ export default function MapPicker({
     }, [])
 
     // nếu prop value.coordinates đổi từ bên ngoài → flyTo + cập nhật marker
+    // Phụ thuộc vào 2 số lng/lat chứ không vào mảng: mảng mới cùng toạ độ không làm bản đồ bay lại
+    const [lng, lat] = Array.isArray(value.coordinates) && value.coordinates.length === 2 ? value.coordinates : []
     useEffect(() => {
-        if (!mapRef.current) return
-        if (!Array.isArray(value.coordinates) || value.coordinates.length !== 2) return
-        markerRef.current?.setLngLat(value.coordinates)
-        mapRef.current.flyTo({ center: value.coordinates, zoom: 15 })
-    }, [value.coordinates?.[0], value.coordinates?.[1]])
+        if (!mapRef.current || lng === undefined || lat === undefined) return
+        markerRef.current?.setLngLat([lng, lat])
+        mapRef.current.flyTo({ center: [lng, lat], zoom: 15 })
+    }, [lng, lat])
 
     // gọi Geoapify autocomplete
     useEffect(() => {

@@ -31,4 +31,14 @@ export default [
       ],
     },
   },
+  // File cấu hình (vite.config.js…) chạy trên Node, không phải trình duyệt → có `process`
+  {
+    files: ['*.config.js'],
+    languageOptions: { globals: globals.node },
+  },
+  // Context export kèm hook (useAuth…) là chủ ý; quy tắc này chỉ ảnh hưởng hot-reload lúc dev
+  {
+    files: ['src/contexts/**/*.jsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
 ]

@@ -85,7 +85,7 @@ export default function BookingWizard() {
 
       setLoading(false);
     })();
-  }, [ptId]);
+  }, [ptId, packageId, set]);
 
   if (loading) {
     return (

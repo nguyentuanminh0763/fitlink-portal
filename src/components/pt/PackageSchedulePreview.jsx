@@ -20,8 +20,6 @@ const eventColor = (patternArr=[]) => {
 };
 
 export default function PackageSchedulePreview({ open, onClose, slots=[], startDate }) {
-  if (!open) return null;
-
   // khung giờ hiển thị
   const minMin = 6*60;   // 06:00
   const maxMin = 21*60;  // 21:00
@@ -65,6 +63,9 @@ export default function PackageSchedulePreview({ open, onClose, slots=[], startD
     const set = new Set(); (slots||[]).forEach(s => set.add((s.pattern||[]).join("-")));
     return Array.from(set).sort();
   }, [slots]);
+
+  // Thoát sớm SAU mọi hook: React nhớ hook theo thứ tự gọi, số hook phải giống nhau ở mọi lần render
+  if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70">

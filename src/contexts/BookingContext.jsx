@@ -1,5 +1,5 @@
 // src/contexts/BookingContext.jsx
-import React, { createContext, useContext, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
 
 const BookingContext = createContext(null);
 
@@ -54,15 +54,16 @@ export function BookingProvider({ children }) {
   console.log("BookingProvider - State: ", state);
   
 
-  const set = (patch) => setState((prev) => ({ ...prev, ...patch }));
-  const reset = () => setState(initialState);
+  // useCallback: hàm ổn định giữa các lần render, nơi dùng đưa vào deps không gây gọi lại liên tục
+  const set = useCallback((patch) => setState((prev) => ({ ...prev, ...patch })), []);
+  const reset = useCallback(() => setState(initialState), []);
 
   const readyForPreview =
     state.pattern.length && state.slot && state.startDate && state.mode;
 
   const value = useMemo(
     () => ({ state, set, reset, readyForPreview }),
-    [state, readyForPreview]
+    [state, set, reset, readyForPreview]
   );
 
   return (

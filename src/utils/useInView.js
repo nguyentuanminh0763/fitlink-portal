@@ -9,9 +9,10 @@ export default function useInView(options = {}) {
       ([entry]) => setInView(entry.isIntersecting),
       options
     );
-    if (ref.current) observer.observe(ref.current);
+    const node = ref.current; // ref.current có thể đã đổi lúc cleanup chạy
+    if (node) observer.observe(node);
     return () => {
-      if (ref.current) observer.unobserve(ref.current);
+      if (node) observer.unobserve(node);
     };
   }, [options]);
 
