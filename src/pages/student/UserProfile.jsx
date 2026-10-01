@@ -20,9 +20,6 @@ const profileSchema = yup.object().shape({
     .required('Tên là bắt buộc')
     .min(2, 'Tên phải từ 2 ký tự')
     .max(30, 'Tên tối đa 30 ký tự'),
-  email: yup
-    .string()
-    .email('Email không đúng định dạng'),
   gender: yup
     .string()
     .oneOf(['male', 'female', 'other'], 'Giới tính không hợp lệ'),
@@ -73,7 +70,6 @@ export default function UserProfile() {
     resolver: yupResolver(profileSchema),
     defaultValues: {
       name: user?.name || '',
-      email: user?.email || '',
       gender: user?.gender || '',
       address: user?.address || '',
       dob: user?.dob ? new Date(user.dob).toISOString().split('T')[0] : ''
@@ -94,7 +90,6 @@ export default function UserProfile() {
     if (profileData) {
       resetProfile({
         name: profileData.name || '',
-        email: profileData.email || '',
         gender: profileData.gender || '',
         address: profileData.address || '',
         dob: profileData.dob ? new Date(profileData.dob).toISOString().split('T')[0] : ''
@@ -294,17 +289,17 @@ export default function UserProfile() {
                       </label>
                       <input
                         type="email"
-                        {...registerProfile('email')}
-                        className={`w-full px-4 py-2.5 rounded-xl border text-sm transition focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 ${
+                        // Email cố định, không thuộc form → không gửi lên server
+                        value={user?.email || ''}
+                        disabled
+                        className={`w-full px-4 py-2.5 rounded-xl border text-sm transition disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 ${
                           isDark 
                             ? '!bg-slate-800/90 border-slate-700 text-white placeholder-slate-500' 
                             : '!bg-white border-slate-200 text-slate-900 placeholder-slate-400'
                         }`}
                         placeholder="Nhập email"
                       />
-                      {profileErrors.email && (
-                        <p className="text-red-500 text-xs mt-1 font-medium">{profileErrors.email.message}</p>
-                      )}
+                      <p className="text-slate-500 text-xs mt-1">Email không thể thay đổi</p>
                     </div>
 
                     {/* Giới tính */}
