@@ -1,9 +1,12 @@
 import axios from '../api/axiosClient';
+import { queryClient } from '~/lib/queryClient';
 
 export const loginWithGoogle = async (idToken) => {
   try {
     // cookie được set bởi backend, frontend không cần lưu token
     const res = await axios.post('/auth/google', { idToken });
+    // Xoá cache TanStack của tài khoản trước, tránh hiện/gửi nhầm dữ liệu người khác
+    queryClient.clear();
     return res.data; // chỉ cần user
   } catch (error) {
     console.error('Google login failed:', error);
@@ -15,6 +18,7 @@ export const login = async (phone, password) => {
     try {
         const res = await axios.post('/auth/login', { phone, password });
         // setToken(res.data.accessToken);
+        queryClient.clear();
         return res.data;
     } catch (error) {
         console.error('Login failed:', error); // xử lý lỗi cụ thể
@@ -37,6 +41,7 @@ export const registerByPhone = async (name, phone, password, email) => {
 export const logout = async () => {
     try {
         await axios.post('/auth/logout')
+        queryClient.clear();
     } catch (error) {
         console.error('Logout failed:', error); // xử lý lỗi cụ thể
         throw error;
